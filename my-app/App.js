@@ -1,12 +1,57 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
+import 'react-native-gesture-handler';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import Notes from './screens/Notes';
+import CreateNote from './screens/CreateNote';
+import DetailedNote from './screens/DetailedNote';
 
 export default function App() {
+
+  const Stack = createStackNavigator();
+  
+  function MyStack() {
+    return (
+      <Stack.Navigator>
+        <Stack.Screen 
+          name="Notes" 
+          component={Notes} 
+          options={{
+            title: "NOTES APP",
+            headerTitleAlign: "center",
+            headerStyle: { backgroundColor: "#E99D42" },
+            headerTintColor: "white"
+          }}
+        />
+        <Stack.Screen 
+          name="Create" 
+          component={CreateNote} 
+          options={{
+            title: "CREATE NOTES",
+            headerTitleAlign: "center",
+            headerStyle: { backgroundColor: "#E99D42" },
+            headerTintColor: "white"
+          }}
+        />
+        <Stack.Screen 
+          name="Details" 
+          component={DetailedNote} 
+          options={{
+            title: "NOTES DETAILS",
+            headerTitleAlign: "center",
+            headerStyle: { backgroundColor: "#E99D42" },
+            headerTintColor: "white"
+          }}
+        />
+      </Stack.Navigator>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <MyStack/>
+    </NavigationContainer>
   );
 }
 
