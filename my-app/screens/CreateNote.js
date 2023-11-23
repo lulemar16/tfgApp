@@ -1,9 +1,13 @@
-import { Text, StyleSheet, View, TextInput, TouchableOpacity} from 'react-native'
+import { Text, StyleSheet, View, TextInput, TouchableOpacity, Alert} from 'react-native'
 import React, { useState, useEffect } from 'react'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { Platform } from 'react-native'
 
-export default function CreateNote() {
+import appFirebase from '../credentials'
+import {getFirestore, collection, addDoc, getDocs, doc, deleteDoc, getDoc, setDoc} from 'firebase/firestore';
+const db = getFirestore(appFirebase)
+
+export default function CreateNote(props) {
 
   const initialState = {
     title: '',
@@ -32,8 +36,8 @@ export default function CreateNote() {
     setDate(fDate);
 
     let fTime = 
-      "Hour: " + tempDate.getHours() + 
-      " ; Minutes: " + tempDate.getMinutes();
+      tempDate.getHours() + ":"
+      + tempDate.getMinutes();
     // setText(fDate + " " + fTime)
     setTime(fTime);
   }
@@ -43,12 +47,47 @@ export default function CreateNote() {
     setMode(currentDate);
   }
 
+  const handleChangeText = (value, name) => {
+    setState({...state, [name]:value})
+  }
+
+  const saveNote = async() => {
+    try {
+      if(state.title === '' || state.note === '') {
+        Alert.alert('important mesaje', 'you should fill the form')
+      }
+      else {
+        const note = {
+          title: state.title,
+          noteDetails: state.note,
+          date: date,
+          time: time
+        }
+        await addDoc(collection(db, 'notes'), {
+          ...note
+        })
+        Alert.alert('Done', 'Save completed')
+        props.navigation.navigate('Notes')
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <View style={styles.containerFather}>
       <View style={styles.card}>
         <View style={styles.container}>
-          <TextInput placeholder='Title' style={styles.inputText} />
-          <TextInput placeholder='Note' multiline={true} numberOfLines={8} style={styles.inputText} />
+          <TextInput placeholder='Title' style={styles.inputText} 
+            value={state.title}
+            onChangeText={(value)=>handleChangeText(value, 'title')}
+          />
+
+          <TextInput placeholder='Note' multiline={true} 
+            numberOfLines={8} style={styles.inputText}
+            value={state.note} 
+            onChangeText={(value)=>handleChangeText(value, 'note')}
+          />
           
           {/* date container */}
           <View style={styles.inputDate}>
@@ -80,7 +119,7 @@ export default function CreateNote() {
 
           {/* button to save the data */}
           <View style={styles.inputDate}>
-            <TouchableOpacity style={styles.saveButton}>
+            <TouchableOpacity style={styles.saveButton} onPress={saveNote}>
               <Text style={styles.saveText}>Save note</Text>
             </TouchableOpacity>
           </View>
@@ -96,7 +135,7 @@ const styles = StyleSheet.create({
   containerFather: {
     flex: 1,
     justifyContent: 'center',
-    alignItems:'centre'
+    alignItems:'center'
   },
   card: {
     margin: 20,
