@@ -4,9 +4,9 @@ import DateTimePicker from '@react-native-community/datetimepicker'
 import { Platform } from 'react-native'
 
 
-// import appFirebase from '../credentials';
-// import {getFirestore, collection, addDoc, getDocs, doc, deleteDoc, getDoc, setDoc} from 'firebase/firestore';
-// const db = getFirestore(appFirebase)
+import appFirebase from '../credentials';
+import {getFirestore, collection, addDoc, getDocs, doc, deleteDoc, getDoc, setDoc} from 'firebase/firestore';
+const db = getFirestore(appFirebase)
 
 export default function CreateNote(props) {
 
@@ -53,38 +53,38 @@ export default function CreateNote(props) {
     setState({...state, [name]:value})
   }
 
-  const saveNote = () => {
-    const note = {
-      title: state.title,
-      detail: state.detail,
-      day: day,
-      time: time
-    }
-    console.log(note);
-  }
-
-  // const saveNote = async() => {
-  //   try {
-  //     if(state.title === '' || state.detail === '') {
-  //       Alert.alert('Important message', 'You should fill the form')
-  //     }
-  //     else {
-  //       const note = {
-  //         title: state.title,
-  //         detail: state.detail,
-  //         day: day,
-  //         time: time
-  //       }
-  //       await addDoc(collection(db, 'notes'), {
-  //         ...note
-  //       })
-  //       Alert.alert('Done', 'Save completed')
-  //       props.navigation.navigate('Notes')
-  //     }
-  //   } catch (error) {
-  //     console.log(error)
+  // const saveNote = () => {
+  //   const note = {
+  //     title: state.title,
+  //     detail: state.detail,
+  //     day: day,
+  //     time: time
   //   }
+  //   console.log(note);
   // }
+
+  const saveNote = async() => {
+    try {
+      if(state.title === '' || state.detail === '') {
+        Alert.alert('Important message', 'You should fill the form')
+      }
+      else {
+        const note = {
+          title: state.title,
+          detail: state.detail,
+          day: day,
+          time: time
+        }
+        await addDoc(collection(db, 'notes'), {
+          ...note
+        })
+        Alert.alert('Done', 'Save completed')
+        props.navigation.navigate('Notes')
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   return (
     <View style={styles.containerFather}>
