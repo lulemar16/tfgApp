@@ -61,6 +61,14 @@ export default function Notes(props) {
 
     //  </ScrollView> 
     // )
+
+    return (
+        <View>
+            <TouchableOpacity style= {styles.button} onPress={()=>props.navigation.navigate('Create')}> 
+                <Text style={styles.buttonText}>Add new note</Text>
+            </TouchableOpacity>
+        </View>
+    )
   
 }
 

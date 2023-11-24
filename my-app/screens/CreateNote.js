@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { Platform } from 'react-native'
 
-// import appFirebase from '../credentials'
+
+// import appFirebase from '../credentials';
 // import {getFirestore, collection, addDoc, getDocs, doc, deleteDoc, getDoc, setDoc} from 'firebase/firestore';
 // const db = getFirestore(appFirebase)
 
@@ -24,7 +25,7 @@ export default function CreateNote(props) {
 
   const onChange = (event, selectDate) => {
     const currentDate = selectDate || date;
-    setShow(Platform.OS === "android");
+    setShow(Platform.OS === "ios");
     setDate(currentDate);
 
     let tempDate = new Date(currentDate);
@@ -48,20 +49,30 @@ export default function CreateNote(props) {
     setMode(currentDate);
   }
 
-  // const handleChangeText = (value, name) => {
-  //   setState({...state, [name]:value})
-  // }
+  const handleChangeText = (value, name) => {
+    setState({...state, [name]:value})
+  }
+
+  const saveNote = () => {
+    const note = {
+      title: state.title,
+      detail: state.detail,
+      day: day,
+      time: time
+    }
+    console.log(note);
+  }
 
   // const saveNote = async() => {
   //   try {
-  //     if(state.title === '' || state.note === '') {
-  //       Alert.alert('important mesaje', 'you should fill the form')
+  //     if(state.title === '' || state.detail === '') {
+  //       Alert.alert('Important message', 'You should fill the form')
   //     }
   //     else {
   //       const note = {
   //         title: state.title,
-  //         noteDetails: state.note,
-  //         date: date,
+  //         detail: state.detail,
+  //         day: day,
   //         time: time
   //       }
   //       await addDoc(collection(db, 'notes'), {
@@ -79,15 +90,20 @@ export default function CreateNote(props) {
     <View style={styles.containerFather}>
       <View style={styles.card}>
         <View style={styles.container}>
-          <TextInput placeholder='Title' style={styles.inputText} 
+          <TextInput 
+            placeholder='Title' 
+            style={styles.inputText} 
             value={state.title}
             onChangeText={(value)=>handleChangeText(value, 'title')}
           />
 
-          <TextInput placeholder='Note' multiline={true} 
-            numberOfLines={8} style={styles.inputText}
-            value={state.note} 
-            onChangeText={(value)=>handleChangeText(value, 'note')}
+          <TextInput 
+            placeholder='Note' 
+            multiline={true} 
+            numberOfLines={8} 
+            style={styles.inputText}
+            value={state.detail} 
+            onChangeText={(value)=>handleChangeText(value, 'detail')}
           />
           
           {/* date container */}
@@ -120,8 +136,7 @@ export default function CreateNote(props) {
 
           {/* button to save the data */}
           <View style={styles.inputDate}>
-            {/* <TouchableOpacity style={styles.saveButton} onPress={saveNote}> */}
-            <TouchableOpacity style={styles.saveButton} >
+            <TouchableOpacity style={styles.saveButton} onPress={saveNote}>
               <Text style={styles.saveText}>
                 Save note
               </Text>
