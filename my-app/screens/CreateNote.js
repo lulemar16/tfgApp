@@ -3,16 +3,16 @@ import React, { useState, useEffect } from 'react'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { Platform } from 'react-native'
 
-import appFirebase from '../credentials'
-import {getFirestore, collection, addDoc, getDocs, doc, deleteDoc, getDoc, setDoc} from 'firebase/firestore';
-const db = getFirestore(appFirebase)
+// import appFirebase from '../credentials'
+// import {getFirestore, collection, addDoc, getDocs, doc, deleteDoc, getDoc, setDoc} from 'firebase/firestore';
+// const db = getFirestore(appFirebase)
 
 export default function CreateNote(props) {
 
   const initialState = {
     title: '',
-    note: ''
-  };
+    detail: ''
+  }
 
   const [date, setDate] = useState(new Date(1598051730000));
   const [mode, setMode] = useState("date");
@@ -24,7 +24,7 @@ export default function CreateNote(props) {
 
   const onChange = (event, selectDate) => {
     const currentDate = selectDate || date;
-    setShow(Platform.OS === "ios");
+    setShow(Platform.OS === "android");
     setDate(currentDate);
 
     let tempDate = new Date(currentDate);
@@ -33,7 +33,8 @@ export default function CreateNote(props) {
       tempDate.getDate() + "/" +
       (tempDate.getMonth() + 1 ) + "/" +
       tempDate.getFullYear();
-    setDate(fDate);
+
+    setDay(fDate);
 
     let fTime = 
       tempDate.getHours() + ":"
@@ -47,32 +48,32 @@ export default function CreateNote(props) {
     setMode(currentDate);
   }
 
-  const handleChangeText = (value, name) => {
-    setState({...state, [name]:value})
-  }
+  // const handleChangeText = (value, name) => {
+  //   setState({...state, [name]:value})
+  // }
 
-  const saveNote = async() => {
-    try {
-      if(state.title === '' || state.note === '') {
-        Alert.alert('important mesaje', 'you should fill the form')
-      }
-      else {
-        const note = {
-          title: state.title,
-          noteDetails: state.note,
-          date: date,
-          time: time
-        }
-        await addDoc(collection(db, 'notes'), {
-          ...note
-        })
-        Alert.alert('Done', 'Save completed')
-        props.navigation.navigate('Notes')
-      }
-    } catch (error) {
-      console.log(error)
-    }
-  }
+  // const saveNote = async() => {
+  //   try {
+  //     if(state.title === '' || state.note === '') {
+  //       Alert.alert('important mesaje', 'you should fill the form')
+  //     }
+  //     else {
+  //       const note = {
+  //         title: state.title,
+  //         noteDetails: state.note,
+  //         date: date,
+  //         time: time
+  //       }
+  //       await addDoc(collection(db, 'notes'), {
+  //         ...note
+  //       })
+  //       Alert.alert('Done', 'Save completed')
+  //       props.navigation.navigate('Notes')
+  //     }
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  // }
 
   return (
     <View style={styles.containerFather}>
@@ -91,7 +92,7 @@ export default function CreateNote(props) {
           
           {/* date container */}
           <View style={styles.inputDate}>
-            <TextInput placeholder='05/11/2023' style={styles.dateText} value={date}/>
+            <TextInput placeholder='05/11/2023' style={styles.dateText} value={day}/>
             <TouchableOpacity style={styles.dateButton} onPress={() => showMode("date")}>
               <Text style={styles.subtitle}>Date</Text>
             </TouchableOpacity>
@@ -119,8 +120,11 @@ export default function CreateNote(props) {
 
           {/* button to save the data */}
           <View style={styles.inputDate}>
-            <TouchableOpacity style={styles.saveButton} onPress={saveNote}>
-              <Text style={styles.saveText}>Save note</Text>
+            {/* <TouchableOpacity style={styles.saveButton} onPress={saveNote}> */}
+            <TouchableOpacity style={styles.saveButton} >
+              <Text style={styles.saveText}>
+                Save note
+              </Text>
             </TouchableOpacity>
           </View>
 
