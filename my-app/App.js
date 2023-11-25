@@ -7,13 +7,30 @@ import { createStackNavigator } from '@react-navigation/stack';
 import Notes from './screens/Notes';
 import CreateNote from './screens/CreateNote';
 import DetailedNote from './screens/DetailedNote';
+import LoginScreen from './screens/LoginScreen';
+import ProfileScreen from './screens/ProfileScreen';
+import SignUpScreen from './screens/SignUpScreen';
 
 export default function App() {
+  
   const Stack = createStackNavigator();
 
   function MyStack() {
     return (
-      <Stack.Navigator>
+      <Stack.Navigator
+        initialRouteName="Login" // Set the initial route to "Login"
+      >
+
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{
+            title: 'LOGIN',
+            headerTitleAlign: 'center',
+            headerStyle: { backgroundColor: '#E99D42' },
+            headerTintColor: 'white',
+          }}
+        />
         <Stack.Screen
           name="Notes"
           component={Notes}
@@ -39,6 +56,26 @@ export default function App() {
           component={DetailedNote}
           options={{
             title: 'NOTES DETAILS',
+            headerTitleAlign: 'center',
+            headerStyle: { backgroundColor: '#E99D42' },
+            headerTintColor: 'white',
+          }}
+        />
+        <Stack.Screen
+          name="Profile"
+          component={ProfileScreen}
+          options={{
+            title: 'USER PROFILE',
+            headerTitleAlign: 'center',
+            headerStyle: { backgroundColor: '#E99D42' },
+            headerTintColor: 'white',
+          }}
+        />
+        <Stack.Screen
+          name="SignUp"
+          component={SignUpScreen}
+          options={{
+            title: 'SIGN UP',
             headerTitleAlign: 'center',
             headerStyle: { backgroundColor: '#E99D42' },
             headerTintColor: 'white',
