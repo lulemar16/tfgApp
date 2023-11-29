@@ -1,15 +1,17 @@
 // screens/SignUpScreen.js
 import React, { useState } from 'react';
-import { View, TextInput, Button } from 'react-native';
-// import { signUp } from '../services/AuthService';
+import { Text, StyleSheet, View, TextInput, Button } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { signUp } from '../services/AuthService';
 
 const SignUpScreen = () => {
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSignUp = async () => {
     try {
-      const user = await signUp(email, password);
+      const user = await signUp(username, email, password);
       console.log('User signed up:', user);
       // Navigate to the next screen or perform additional actions upon successful signup
     } catch (error) {
@@ -19,12 +21,77 @@ const SignUpScreen = () => {
   };
 
   return (
-    <View>
-      <TextInput placeholder="Email" onChangeText={setEmail} />
-      <TextInput placeholder="Password" secureTextEntry onChangeText={setPassword} />
-      <Button title="Sign Up" onPress={handleSignUp} />
+    <View style={styles.containerFather}>
+      <Text style={styles.subtitle}>SIGN UP</Text>
+      <TextInput style={styles.inputText} placeholder="Email" onChangeText={setEmail} />
+      <TextInput style={styles.inputText} placeholder="Password" secureTextEntry onChangeText={setPassword} />
+      <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
+            <Text style={styles.loginButton}>
+                Sign up
+            </Text>
+        </TouchableOpacity>
+      <View style={styles.container}>
+        <Text>Log in into your existing account</Text>
+        <TouchableOpacity style={styles.signUpButton} onPress={()=>props.navigation.navigate('Login')}>
+            <Text>
+                Log in
+            </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 export default SignUpScreen;
+
+const styles = StyleSheet.create({
+  containerFather: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems:'center',
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    width: '90%',
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation:5
+  },
+  container: {
+    padding:20
+  },
+  inputText: {
+    borderColor: '#F4CE98',
+    borderWidth: 1,
+    padding: 8, 
+    marginTop:10,
+    borderRadius:8,
+    width: '80%'
+  },
+  subtitle: {
+    color: '#E99D42',
+    fontSize:30
+  },
+  signUpButton: {
+    backgroundColor: '#E99D42',
+    borderColor: '#F4CE98',
+    borderWidth: 3,
+    borderRadius: 20,
+    marginLeft: 20,
+    marginRight: 20,
+    marginTop: 20,
+    alignItems: 'center'
+  },
+  loginButton: {
+    textAlign: 'center',
+    padding: 10,
+    color: 'white',
+    fontSize: 16
+  }
+})
