@@ -20,14 +20,11 @@ export default function Todos(props) {
         const querySnapshot = await getDocs(collection(db, 'todos'));
         const todos = [];
         querySnapshot.forEach((doc) => {
-          const { title, detail, day, time } = doc.data();
+          const { title, tasks } = doc.data();
           todos.push({
             id: doc.id,
             title,
-            detail,
-            day,
-            time,
-            completed: false, // Added a completed property for the checkbox
+            tasks: tasks || [],
           });
         });
         setTodos(todos);
@@ -38,84 +35,92 @@ export default function Todos(props) {
     getTodos();
   }, []);
 
-  const toggleTodo = (id) => {
+  const toggleTask = (todoId, taskId) => {
     setTodos((prevTodos) =>
       prevTodos.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+        todo.id === todoId
+          ? {
+              ...todo,
+              tasks: todo.tasks.map((task) =>
+                task.id === taskId ? { ...task, completed: !task.completed } : task
+              ),
+            }
+          : todo
       )
     );
   };
 
   return (
-    <ScrollView>
-      <View>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => props.navigation.navigate('Create')}
+    <ScrollView style={styles.container}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => props.navigation.navigate('Create')}
+      >
+        <Text style={styles.buttonText}>Add new ToDo list</Text>
+      </TouchableOpacity>
+
+      {todos.map((todo) => (
+        <ListItem
+          key={todo.id}
+          onPress={() => {
+            props.navigation.navigate('Details', { todoId: todo.id });
+          }}
+          style={styles.listItemContainer}
         >
-          <Text style={styles.buttonText}>Add new ToDo list</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.container}>
-        {todos.map((todo) => (
-          <ListItem
-            key={todo.id}
-            onPress={() => {
-              props.navigation.navigate('Details', { todoId: todo.id });
-            }}
-          >
-            <ListItemChevron />
-
-            <ListItemContent>
-              {/* Use the CheckBox component here */}
-              <CheckBox
-                value={todo.completed}
-                onValueChange={() => toggleTodo(todo.id)}
-              />
-              <ListItemTitle style={styles.title}>{todo.title}</ListItemTitle>
-              <ListItemSubtitle>{todo.day}</ListItemSubtitle>
-            </ListItemContent>
-          </ListItem>
-        ))}
-      </View>
+          <ListItemChevron />
+          <ListItemContent>
+            <ListItemTitle style={styles.title}>{todo.title}</ListItemTitle>
+            {todo.tasks.map((task) => (
+              <View key={task.id} style={styles.taskContainer}>
+                <CheckBox
+                  value={task.completed}
+                  onValueChange={() => toggleTask(todo.id, task.id)}
+                />
+                <Text style={styles.taskTitle}>{task.title}</Text>
+              </View>
+            ))}
+          </ListItemContent>
+        </ListItem>
+      ))}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#f0f0f0',
+  },
   button: {
-    backgroundColor: '#FFBF6B',
-    borderColor: '#E99D42',
-    borderWidth: 3,
-    borderRadius: 20,
-    marginLeft: 20,
-    marginRight: 20,
-    marginTop: 20,
+    backgroundColor: '#4CAF50',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 20,
   },
   buttonText: {
     textAlign: 'center',
-    padding: 10,
     color: 'white',
     fontSize: 16,
+    fontWeight: 'bold',
   },
-  container: {
-    margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    width: '90%',
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+  listItemContainer: {
+    marginBottom: 20,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 15,
+    elevation: 3,
   },
   title: {
     fontWeight: 'bold',
-    marginLeft: 10, // Adjusted the margin to make space for the checkbox
+    marginLeft: 10,
+  },
+  taskContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 5,
+  },
+  taskTitle: {
+    marginLeft: 10,
   },
 });

@@ -46,7 +46,7 @@ export default class AudioScreen extends Component {
                 isRecording: false,
                 isPaused: false,
                 recordings: [
-                  { duration: recordingDuration, /* Otra información de la grabación */ },
+                  { duration: recordingDuration, /* Other recording information */ },
                   ...prevState.recordings,
                 ],
                 elapsedTime: 0,
@@ -54,7 +54,7 @@ export default class AudioScreen extends Component {
 
               clearInterval(this.timerInterval);
 
-              // Desplazar hacia arriba para mostrar la nueva grabación al principio
+              // Scroll up to show the new recording at the top
               this.flatListRef.scrollToOffset({ offset: 0, animated: true });
             },
           },
@@ -85,12 +85,12 @@ export default class AudioScreen extends Component {
 
   togglePlay = (index) => {
     if (this.state.isPlaying && index === this.state.playingRecordingIndex) {
-      // Pausar reproducción
-      // Lógica para pausar la reproducción
+      // Pause playback
+      // Logic to pause playback
       this.setState({ isPlaying: false });
     } else {
-      // Iniciar reproducción
-      // Lógica para iniciar la reproducción de la grabación en el índice especificado
+      // Start playback
+      // Logic to start playback of the recording at the specified index
       this.setState({ isPlaying: true, playingRecordingIndex: index });
     }
   };
@@ -113,12 +113,12 @@ export default class AudioScreen extends Component {
                   <Icon
                     name={this.isPlaying(index) ? 'pause' : 'play-arrow'}
                     size={20}
-                    color="black"
+                    color="white"
                   />
                 </TouchableOpacity>
-                <Text>{item.duration}s</Text>
+                <Text style={styles.playbackText}>{item.duration}s</Text>
               </View>
-              {/* Agrega más detalles de la grabación según sea necesario */}
+              {/* Add more details of the recording as needed */}
             </View>
           )}
         />
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
   playbackContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFBF6B',
+    backgroundColor: '#4CAF50',
     padding: 10,
     borderRadius: 10,
     shadowColor: '#000',
@@ -165,10 +165,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    width: '90%',  
-    alignSelf: 'center', 
-    marginHorizontal: '40%', 
-    marginBottom: 10, 
+    width: '90%',
+    alignSelf: 'center',
+    marginHorizontal: '5%',
+    marginBottom: 10,
+  },
+  playbackText: {
+    color: 'white',
+    marginLeft: 10,
   },
   recordButton: {
     width: 60,

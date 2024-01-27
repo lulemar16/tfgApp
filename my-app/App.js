@@ -6,16 +6,18 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+
 import ListsScreen from './screens/ListsScreen'; 
 import AudioScreen from './screens/AudioScreen'; 
 import StatisticsScreen from './screens/StatisticsScreen';
 import Notes from './screens/Notes';
+import HomeScreen from './screens/HomeScreen';
+
 import CreateNote from './screens/CreateNote';
 import DetailedNote from './screens/DetailedNote';
 import LoginScreen from './screens/LoginScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import SignUpScreen from './screens/SignUpScreen';
-import HomeScreen from './screens/HomeScreen';
 
 
 export default function App() {
@@ -102,8 +104,15 @@ export default function App() {
       // </Stack.Navigator>
 
       <NavigationContainer independent={true}>
-        <Tab.Navigator 
-          initialRouteName="Home">
+        <Tab.Navigator // SET INITIAL ROUTE TO LOGIN
+          initialRouteName="Home" 
+          tabBarOptions={{
+            activeTintColor: '#4CAF50', // Set the color for the selected tab
+            labelStyle: {
+              fontSize: 12, // Set the font size for the tab labels
+            },
+          }}
+          > 
           <Tab.Screen
             name="Notes"
             component={Notes}
@@ -145,13 +154,13 @@ export default function App() {
             }}
           />
           <Tab.Screen
-            name="Stats"
+            name="Clock"
             component={StatisticsScreen}
             options={{
               tabBarIcon: ({ color, size }) => (
-                <MaterialIcons name="bar-chart" color={color} size={size} />
+                <MaterialIcons name="access-time" color={color} size={size} />
               ),
-              title: 'Stats', 
+              title: 'Clock', 
               headerTitleAlign: 'center'
             }}
           />
