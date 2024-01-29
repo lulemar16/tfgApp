@@ -2,11 +2,11 @@ import React, { Component } from 'react';
 import {
   Text,
   View,
-  Button,
   TextInput,
   Switch,
   FlatList,
   TouchableOpacity,
+  Button,
 } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import dayjs from 'dayjs';
@@ -161,6 +161,7 @@ export default class ClockScreen extends Component {
                 <Switch
                   value={item.enabled}
                   onValueChange={() => this.toggleAlarm(index)}
+                  thumbColor={item.enabled ? '#4CAF50' : '#ccc'}
                 />
               </View>
             )}
@@ -190,10 +191,12 @@ export default class ClockScreen extends Component {
             renderItem={({ item, index }) => (
               <View style={styles.listItem}>
                 <Text>{`${item.time}`}</Text>
-                <Button
-                  title={item.paused ? 'Start' : 'Pause'}
+                <TouchableOpacity
+                  style={styles.timerButton}
                   onPress={() => this.toggleTimer(index)}
-                />
+                >
+                  <Text style={styles.timerButtonText}>{item.paused ? 'Start' : 'Pause'}</Text>
+                </TouchableOpacity>
               </View>
             )}
           />
@@ -208,13 +211,6 @@ const styles = {
     flex: 1,
     padding: 20,
     backgroundColor: '#f0f0f0',
-  },
-  heading: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333',
-    marginLeft:'40%'
   },
   section: {
     marginBottom: 20,
@@ -260,5 +256,16 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     marginVertical: 5,
+  },
+  timerButton: {
+    backgroundColor: '#2196F3',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  timerButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 };

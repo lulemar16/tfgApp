@@ -97,6 +97,9 @@ export default class AudioScreen extends Component {
 
   isPlaying = (index) => this.state.isPlaying && index === this.state.playingRecordingIndex;
 
+  // Helper function to format time components to have leading zeros
+  formatTimeComponent = (value) => (value < 10 ? `0${value}` : value);
+
   render() {
     const { isRecording, isPaused, elapsedTime } = this.state;
 
@@ -106,35 +109,48 @@ export default class AudioScreen extends Component {
           ref={(ref) => (this.flatListRef = ref)}
           data={this.state.recordings}
           keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item, index }) => (
-            <View style={styles.recordingItem}>
-              <View style={styles.playbackContainer}>
-                <TouchableOpacity onPress={() => this.togglePlay(index)}>
-                  <Icon
-                    name={this.isPlaying(index) ? 'pause' : 'play-arrow'}
-                    size={20}
-                    color="white"
-                  />
-                </TouchableOpacity>
-                <Text style={styles.playbackText}>{item.duration}s</Text>
+          renderItem={({ item, index }) => {
+            const durationInSeconds = item.duration / 1000;
+            const hours = Math.floor(durationInSeconds / 3600);
+            const minutes = Math.floor((durationInSeconds % 3600) / 60);
+            const seconds = Math.floor(durationInSeconds % 60);
+
+            return (
+              <View style={styles.recordingItem}>
+                <View style={styles.playbackContainer}>
+                  <TouchableOpacity onPress={() => this.togglePlay(index)}>
+                    <Icon
+                      name={this.isPlaying(index) ? 'pause' : 'play-arrow'}
+                      size={20}
+                      color="white"
+                    />
+                  </TouchableOpacity>
+                  <Text style={styles.playbackText}>
+                    {`${this.formatTimeComponent(hours)}:${this.formatTimeComponent(
+                      minutes
+                    )}:${this.formatTimeComponent(seconds)}`}
+                  </Text>
+                </View>
+                {/* Add more details of the recording as needed */}
               </View>
-              {/* Add more details of the recording as needed */}
+            );
+          }}
+        />
+        <View style={styles.record}>
+          <TouchableOpacity style={styles.recordButton} onPress={this.toggleRecording}>
+            <Icon name={isRecording ? 'stop' : 'mic'} size={30} color="white" />
+          </TouchableOpacity>
+        
+
+          {isRecording && (
+            <View style={styles.recordingInfo}>
+              <TouchableOpacity style={styles.pauseButton} onPress={this.togglePause}>
+                <Icon name={isPaused ? 'play-arrow' : 'pause'} size={20} color="white" />
+              </TouchableOpacity>
+              <Text style={styles.recordingTime}>{elapsedTime}s</Text>
             </View>
           )}
-        />
-
-        <TouchableOpacity style={styles.recordButton} onPress={this.toggleRecording}>
-          <Icon name={isRecording ? 'stop' : 'mic'} size={30} color="white" />
-        </TouchableOpacity>
-
-        {isRecording && (
-          <View style={styles.recordingInfo}>
-            <TouchableOpacity style={styles.pauseButton} onPress={this.togglePause}>
-              <Icon name={isPaused ? 'play-arrow' : 'pause'} size={20} color="white" />
-            </TouchableOpacity>
-            <Text style={styles.recordingTime}>{elapsedTime}s</Text>
-          </View>
-        )}
+        </View>
       </View>
     );
   }
@@ -144,7 +160,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
+    // alignItems: 'center',
   },
   recordingItem: {
     padding: 10,
@@ -155,8 +171,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#4CAF50',
-    padding: 10,
-    borderRadius: 10,
+    padding: 15,
+    borderRadius: 15,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -165,14 +181,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    width: '90%',
+    width: '90%', 
     alignSelf: 'center',
-    marginHorizontal: '5%',
     marginBottom: 10,
-  },
+  },  
   playbackText: {
     color: 'white',
     marginLeft: 10,
+  },
+  record:{
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   recordButton: {
     width: 60,
