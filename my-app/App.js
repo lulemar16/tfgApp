@@ -106,10 +106,11 @@ export default function App() {
       // </Stack.Navigator>
 
       <NavigationContainer independent={true}>
-        <Tab.Navigator // SET INITIAL ROUTE TO LOGIN
-          initialRouteName="Home" 
-          tabBarOptions={{
-            activeTintColor: '#4CAF50', // Set the color for the selected tab
+        <Tab.Navigator 
+          initialRouteName="Home" // SET INITIAL ROUTE TO LOGIN
+          activeTintColor='#4CAF50' // Set the color for the selected tab
+          screenOptions={{
+            activeTintColor: '#4CAF50', 
             labelStyle: {
               fontSize: 12, // Set the font size for the tab labels
             },

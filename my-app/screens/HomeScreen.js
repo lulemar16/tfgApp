@@ -1,11 +1,16 @@
 import React, { Component } from 'react';
-import { Text, StyleSheet, View, Image, TouchableOpacity } from 'react-native';
+import { Text, StyleSheet, View, Image, TouchableOpacity, Button } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
+import { Video, ResizeMode } from 'expo-av';
+import YouTubePlayer from 'react-native-youtube-iframe';
+
 
 export default function HomeScreen() {
 
   const navigation = useNavigation();
+  const video = React.useRef(null);
+  const [status, setStatus] = React.useState({});
 
   return (
     <View style={styles.container}>
@@ -31,7 +36,17 @@ export default function HomeScreen() {
         </TouchableOpacity> */}
       </View>
 
-      {/* Screen */}
+      {/* Video Section */}
+      <View style={styles.videoSection}>
+        <YouTubePlayer
+        height={315}
+        play= {true}
+        videoId='_tV5LEBDs7w'>
+        </YouTubePlayer>
+      </View>
+
+
+      {/* Rest of the Screen */}
       <View style={styles.restOfScreen}>
         {/* Screen content */}
         <Text>Other screen content...</Text>
@@ -39,7 +54,6 @@ export default function HomeScreen() {
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {
@@ -77,13 +91,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#fff',
   },
-  restOfScreen: {
-    flex: 1,
-    padding: 20,
-  },
   editButton: {
     padding: 10,
     borderRadius: 5,
     backgroundColor: '#fff',  // Or any color you prefer
+  },
+  videoSection: {
+    flex: 1,
+    backgroundColor: '#000',  // Background color of the video section
+    margin: 10
+  },
+  restOfScreen: {
+    flex: 1,
+    padding: 20,
   },
 });
