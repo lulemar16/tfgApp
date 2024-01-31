@@ -1,19 +1,16 @@
 import React, { Component } from 'react';
-import { Text, StyleSheet, View, Image, TouchableOpacity, Button } from 'react-native';
+import { Text, StyleSheet, View, Image, TouchableOpacity, Button, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import { Video, ResizeMode } from 'expo-av';
 import YouTubePlayer from 'react-native-youtube-iframe';
+import CarouselComponent from './CarrouselImages';
 
 
 export default function HomeScreen() {
 
-  const navigation = useNavigation();
-  const video = React.useRef(null);
-  const [status, setStatus] = React.useState({});
-
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {/* Profile */}
       <View style={styles.profileSection}>
         {/* Profile image */}
@@ -36,29 +33,42 @@ export default function HomeScreen() {
         </TouchableOpacity> */}
       </View>
 
+      
       {/* Video Section */}
       <View style={styles.videoSection}>
         <YouTubePlayer
-        height={315}
+        height={200}
         play= {true}
         videoId='_tV5LEBDs7w'>
         </YouTubePlayer>
       </View>
 
+      {/* Carousel Section */}
+      <View style={styles.carouselSection}>
+        <CarouselComponent />
+      </View>
+
+      {/* Video Section */}
+      <View style={styles.videoSection}>
+        <YouTubePlayer
+        height={200}
+        play= {true}
+        videoId='EhLhE8865tU'>
+        </YouTubePlayer>
+      </View>
 
       {/* Rest of the Screen */}
       <View style={styles.restOfScreen}>
         {/* Screen content */}
         <Text>Other screen content...</Text>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
+    flex: 1
   },
   profileSection: {
     flexDirection: 'row',
@@ -94,12 +104,15 @@ const styles = StyleSheet.create({
   editButton: {
     padding: 10,
     borderRadius: 5,
-    backgroundColor: '#fff',  // Or any color you prefer
+    backgroundColor: '#fff',  
   },
   videoSection: {
-    flex: 1,
-    backgroundColor: '#000',  // Background color of the video section
+    backgroundColor: '#000',  
     margin: 10
+  },
+  carouselSection: {
+    margin: 10,
+    height: 200
   },
   restOfScreen: {
     flex: 1,

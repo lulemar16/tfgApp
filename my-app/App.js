@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { AppRegistry, StyleSheet, Text, View } from 'react-native';
+import { AppRegistry, StyleSheet, Text, View, Image } from 'react-native';
 import 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -123,7 +123,13 @@ export default function App() {
               tabBarIcon: ({ color, size }) => (
                 <MaterialIcons name="note" color={color} size={size} />
               ),
-              headerTitleAlign: 'center'
+              headerTitleAlign: 'center',
+              // headerRight: () => (
+              //   <Image
+              //     source={require('./logoF.jpg')}
+              //     style={{ width: 30, height: 30, marginRight: 10 }}
+              //   />
+              // ),
             }}
           />
           <Tab.Screen
