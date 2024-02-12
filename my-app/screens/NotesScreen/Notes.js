@@ -7,7 +7,7 @@ import { ListItemContent } from '@rneui/base/dist/ListItem/ListItem.Content';
 import { ListItemTitle } from '@rneui/base/dist/ListItem/ListItem.Title';
 import { ListItemSubtitle } from '@rneui/base/dist/ListItem/ListItem.Subtitle';
 
-import appFirebase from '../credentials';
+import appFirebase from '../../credentials';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 
 const db = getFirestore(appFirebase);

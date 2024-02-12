@@ -1,6 +1,6 @@
 // screens/ProfileScreen.js
 import React, { useState } from 'react';
-import { View, TextInput, Button, Image, TouchableOpacity } from 'react-native';
+import { View, TextInput, Button, Image, TouchableOpacity, Text } from 'react-native';
 // import { logOut } from '../services/AuthService';
 
 const ProfileScreen = ({ navigation }) => {

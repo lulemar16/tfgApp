@@ -1,7 +1,7 @@
 // screens/LoginScreen.js
 import React, { useState } from 'react';
 import { StyleSheet, View, TextInput, Button, Touchable } from 'react-native';
-import { logIn } from '../services/AuthService';
+import { logIn } from '../../services/AuthService';
 import { Text } from '@rneui/base';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 

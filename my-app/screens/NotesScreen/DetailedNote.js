@@ -2,7 +2,7 @@ import { Text, StyleSheet, View, Alert } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 
-import appFirebase from '../credentials';
+import appFirebase from '../../credentials';
 import {getFirestore, collection, addDoc, getDocs, doc, deleteDoc, getDoc, setDoc} from 'firebase/firestore';
 const db = getFirestore(appFirebase)
 

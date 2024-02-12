@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Text, StyleSheet, View, TextInput, Button } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { signUp } from '../services/AuthService';
+import { signUp } from '../../services/AuthService';
 
 const SignUpScreen = () => {
   const [username, setUsername] = useState('');

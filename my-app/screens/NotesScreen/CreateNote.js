@@ -4,7 +4,7 @@ import DateTimePicker from '@react-native-community/datetimepicker'
 import { Platform } from 'react-native'
 
 
-import appFirebase from '../credentials';
+import appFirebase from '../../credentials';
 import {getFirestore, collection, addDoc, getDocs, doc, deleteDoc, getDoc, setDoc} from 'firebase/firestore';
 const db = getFirestore(appFirebase)
 
