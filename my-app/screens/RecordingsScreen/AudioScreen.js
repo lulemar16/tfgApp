@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, StyleSheet, View, FlatList, TouchableOpacity, Alert } from 'react-native';
+import { Text, StyleSheet, View, FlatList, TouchableOpacity, Alert, TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 export default class AudioScreen extends Component {
@@ -13,6 +13,7 @@ export default class AudioScreen extends Component {
       elapsedTime: 0,
       isPlaying: false,
       playingRecordingIndex: null,
+      recordingTitle: '',
     };
     this.timerInterval = null;
   }
@@ -35,6 +36,7 @@ export default class AudioScreen extends Component {
                 isRecording: false,
                 isPaused: false,
                 elapsedTime: 0,
+                recordingTitle: '', // Clear recording title
               });
               clearInterval(this.timerInterval);
             },
@@ -46,10 +48,11 @@ export default class AudioScreen extends Component {
                 isRecording: false,
                 isPaused: false,
                 recordings: [
-                  { duration: recordingDuration, /* Other recording information */ },
+                  { title: this.state.recordingTitle, duration: recordingDuration, /* Other recording information */ },
                   ...prevState.recordings,
                 ],
                 elapsedTime: 0,
+                recordingTitle: '', // Clear recording title
               }));
 
               clearInterval(this.timerInterval);
@@ -101,7 +104,7 @@ export default class AudioScreen extends Component {
   formatTimeComponent = (value) => (value < 10 ? `0${value}` : value);
 
   render() {
-    const { isRecording, isPaused, elapsedTime } = this.state;
+    const { isRecording, isPaused, elapsedTime, recordingTitle } = this.state;
 
     return (
       <View style={styles.container}>
@@ -118,6 +121,7 @@ export default class AudioScreen extends Component {
             return (
               <View style={styles.recordingItem}>
                 <View style={styles.playbackContainer}>
+                  <Text style={styles.titleText}>{item.title}</Text>
                   <TouchableOpacity onPress={() => this.togglePlay(index)}>
                     <Icon
                       name={this.isPlaying(index) ? 'pause' : 'play-arrow'}
@@ -125,11 +129,13 @@ export default class AudioScreen extends Component {
                       color="white"
                     />
                   </TouchableOpacity>
-                  <Text style={styles.playbackText}>
-                    {`${this.formatTimeComponent(hours)}:${this.formatTimeComponent(
-                      minutes
-                    )}:${this.formatTimeComponent(seconds)}`}
-                  </Text>
+                  <View>
+                    <Text style={styles.playbackText}>
+                      {`${this.formatTimeComponent(hours)}:${this.formatTimeComponent(
+                        minutes
+                      )}:${this.formatTimeComponent(seconds)}`}
+                    </Text>
+                  </View>
                 </View>
                 {/* Add more details of the recording as needed */}
               </View>
@@ -140,7 +146,6 @@ export default class AudioScreen extends Component {
           <TouchableOpacity style={styles.recordButton} onPress={this.toggleRecording}>
             <Icon name={isRecording ? 'stop' : 'mic'} size={30} color="white" />
           </TouchableOpacity>
-        
 
           {isRecording && (
             <View style={styles.recordingInfo}>
@@ -148,6 +153,12 @@ export default class AudioScreen extends Component {
                 <Icon name={isPaused ? 'play-arrow' : 'pause'} size={20} color="white" />
               </TouchableOpacity>
               <Text style={styles.recordingTime}>{elapsedTime}s</Text>
+              <TextInput
+                style={styles.titleInput}
+                placeholder="Recording Title"
+                onChangeText={(text) => this.setState({ recordingTitle: text })}
+                value={recordingTitle}
+              />
             </View>
           )}
         </View>
@@ -170,7 +181,9 @@ const styles = StyleSheet.create({
   playbackContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#FFBF6B',
+    borderColor: '#black',
+    borderWidth: 2,
     padding: 15,
     borderRadius: 15,
     shadowColor: '#000',
@@ -181,15 +194,27 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    width: '90%', 
+    width: '90%',
     alignSelf: 'center',
     marginBottom: 10,
-  },  
+  },
   playbackText: {
-    color: 'white',
+    color: 'black',
     marginLeft: 10,
   },
-  record:{
+  titleText: {
+    color: 'black',
+    fontSize: 14,
+    marginTop: 5,
+  },
+  titleInput: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginTop: 5,
+    paddingLeft: 10,
+  },
+  record: {
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -197,7 +222,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: 'red',
+    backgroundColor: '#FCCA00',
     justifyContent: 'center',
     alignItems: 'center',
     position: 'absolute',

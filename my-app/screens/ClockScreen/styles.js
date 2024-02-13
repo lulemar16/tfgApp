@@ -49,6 +49,12 @@ const styles = {
       alignItems: 'center',
       marginVertical: 5,
     },
+    listItem2: {
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginVertical: 5,
+    },
     timerButton: {
       backgroundColor: '#FCCA00',
       padding: 10,

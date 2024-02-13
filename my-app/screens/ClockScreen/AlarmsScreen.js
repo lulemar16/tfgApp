@@ -14,11 +14,13 @@ const AlarmsSection = (props) => {
   const {
     alarms,
     newAlarm,
+    newAlarmTitle,
+    setNewAlarmTitle,
     showAlarmPicker,
     selectedAlarmTime,
     addAlarm,
     toggleAlarm,
-    removeAlarm, // Add this prop
+    removeAlarm,
     setShowAlarmPicker,
     setSelectedAlarmTime,
   } = props;
@@ -29,7 +31,13 @@ const AlarmsSection = (props) => {
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Set new alarm"
+          placeholder="Name"
+          value={newAlarmTitle}
+          onChangeText={(text) => setNewAlarmTitle(text)}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Select time"
           value={newAlarm}
           onTouchStart={() => setShowAlarmPicker(true)}
         />
@@ -41,7 +49,7 @@ const AlarmsSection = (props) => {
             date={selectedAlarmTime}
             onConfirm={(date) => {
               setSelectedAlarmTime(date);
-              addAlarm();
+              addAlarm(); // Ensure you are setting the title here
             }}
             onCancel={() => setShowAlarmPicker(false)}
           />
@@ -55,7 +63,10 @@ const AlarmsSection = (props) => {
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item, index }) => (
           <View style={styles.listItem}>
-            <Text>{`${item.time}`}</Text>
+            <View style={styles.listItem2}>
+              <Text>{`${item.title}`}</Text>
+              <Text>{`${item.time}`}</Text>
+            </View>
             <Switch
               value={item.enabled}
               onValueChange={() => toggleAlarm(index)}

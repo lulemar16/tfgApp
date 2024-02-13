@@ -14,6 +14,7 @@ const ClockScreen = () => {
   const [timers, setTimers] = useState([]);
   const [deadlines, setDeadlines] = useState([]);
   const [newAlarm, setNewAlarm] = useState('');
+  const [newAlarmTitle, setNewAlarmTitle] = useState('');
   const [newTimer, setNewTimer] = useState('');
   const [newDeadline, setNewDeadline] = useState('');
   const [showAlarmPicker, setShowAlarmPicker] = useState(false);
@@ -32,11 +33,13 @@ const ClockScreen = () => {
     const newAlarmTime = dayjs(selectedAlarmTime).format('HH:mm');
     setAlarms([
       ...alarms,
-      { time: newAlarmTime, type: 'alarm', enabled: true },
+      { title: newAlarmTitle, time: newAlarmTime, type: 'alarm', enabled: true },
     ]);
     setShowAlarmPicker(false);
     setNewAlarm('');
+    setNewAlarmTitle('');
   };
+  
 
   const toggleAlarm = (index) => {
     const updatedAlarms = [...alarms];
@@ -129,6 +132,8 @@ const ClockScreen = () => {
         <AlarmsSection
           alarms={alarms}
           newAlarm={newAlarm}
+          newAlarmTitle={newAlarmTitle} 
+          setNewAlarmTitle={setNewAlarmTitle}
           showAlarmPicker={showAlarmPicker}
           selectedAlarmTime={selectedAlarmTime}
           addAlarm={addAlarm}
