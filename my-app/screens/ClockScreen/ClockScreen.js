@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import AlarmsSection from './AlarmsScreen';
 import TimersSection from './TimersScreen';
 import DeadlinesSection from './DeadlinesScreen';
@@ -7,7 +7,7 @@ import CustomDateTimePickerModal from './DateTimePickerModal'; // Update the pat
 import styles from './styles'; // Update the path
 import dayjs from 'dayjs';
 // import { ScrollView, GestureHandlerRootView  } from 'react-native-gesture-handler';
-import { ScrollView } from 'react-native-virtualized-view'
+// import { ScrollView } from 'react-native-virtualized-view'
 
 const ClockScreen = () => {
   const [alarms, setAlarms] = useState([]);
