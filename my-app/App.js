@@ -9,6 +9,7 @@ import ClockScreen from './screens/ClockScreen/ClockScreen';
 import Notes from './screens/NotesScreen/Notes';
 import HomeScreen from './screens/HomeScreen/HomeScreen';
 import SettingsScreen from './screens/SettingsScreen/SettingsScreen';
+import HomeStackScreen from './stacks/HomeStack';
 
 
 export default function App() {
@@ -17,7 +18,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Tab.Navigator 
-        initialRouteName="Home"
+        initialRouteName="NiM" // set login as initial route
         activeTintColor='#E99D42'
         screenOptions={{
           activeTintColor: '#E99D42', 
@@ -45,8 +46,8 @@ export default function App() {
           }}
         />
         <Tab.Screen
-          name="Home"
-          component={HomeScreen}
+          name="NiM"
+          component={HomeStackScreen}
           options={{
             tabBarIcon: ({ color, size }) => (
               <MaterialIcons name="home" color={color} size={size} />

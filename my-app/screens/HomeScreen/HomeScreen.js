@@ -3,25 +3,33 @@ import { Text, StyleSheet, View, ScrollView, TouchableOpacity } from 'react-nati
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import YouTubePlayer from 'react-native-youtube-iframe';
 import CarouselComponent from './CarrouselImages';
+import {useNavigation} from "@react-navigation/native";
+import { Button } from '@rneui/base';
 
 export default function HomeScreen() {
+
+  const navigation = useNavigation();
 
   return (
     <ScrollView style={styles.container}>
       {/* Profile */}
       <View style={styles.profileSection}>
-        {/* Profile icon */}
-        <Icon name="account-circle" size={70} color="#555" />
-        {/* Profile image */}
-        {/* <Image
-          style={styles.profileImage}
-          source={{ uri: 'URL_DE_TU_IMAGEN' }} // Replace 'URL_DE_TU_IMAGEN' with the URL of your profile image
-        /> */}
-        {/* User information */}
-        <View style={styles.userInfo}>
-          <Text style={styles.username}>@username</Text>
-          <Text style={styles.followersCount}>1000 followers</Text>
-        </View>
+          {/* Profile icon */}
+          <Icon name="account-circle" size={70} color="#555" />
+          {/* Profile image */}
+          {/* <Image
+            style={styles.profileImage}
+            source={{ uri: 'URL_DE_TU_IMAGEN' }} // Replace 'URL_DE_TU_IMAGEN' with the URL of your profile image
+          /> */}
+          {/* User information */}
+          <View style={styles.userInfo}>
+            <Text style={styles.username}>@username</Text>
+            <Text style={styles.followersCount}>1000 followers</Text>
+          </View>
+          <Button style={styles.profileButton} 
+          onPress={() => navigation.navigate('Profile')}>
+            PROFILE
+          </Button>
       </View>
 
       {/* Video Section */}
@@ -79,7 +87,8 @@ const styles = StyleSheet.create({
   userInfo: {
     flexDirection: 'column',
     padding: 15,
-    paddingLeft: '15%'
+    paddingLeft: '10%',
+    paddingRight: '10%'
   },
   username: {
     fontSize: 18,
@@ -91,10 +100,9 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   profileButton: {
-    backgroundColor: '#fff',
-    padding: 10,
+    backgroundColor: '#E99D42',
+    padding: 1,
     borderRadius: 5,
-    marginLeft: 'auto', // Push the button to the right
   },
   videoSection: {
     backgroundColor: '#000',
