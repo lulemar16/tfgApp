@@ -11,7 +11,7 @@ export default function HomeScreen() {
       {/* Profile */}
       <View style={styles.profileSection}>
         {/* Profile icon */}
-        <Icon name="account-circle" size={60} color="#555" />
+        <Icon name="account-circle" size={70} color="#555" />
         {/* Profile image */}
         {/* <Image
           style={styles.profileImage}
@@ -28,20 +28,20 @@ export default function HomeScreen() {
       <View style={styles.videoSection}>
         <YouTubePlayer 
         height={210} 
-        play={true} 
+        play={false} 
         videoId='_tV5LEBDs7w' />
       </View>
 
       {/* Carousel Section */}
-      {/* <View style={styles.carouselSection}>
+      <View style={styles.carouselSection}>
         <CarouselComponent />
-      </View> */}
+      </View>
 
       {/* Video Section */}
       <View style={styles.videoSection}>
         <YouTubePlayer 
         height={210} 
-        play={true} 
+        play={false} 
         videoId='EhLhE8865tU' />
       </View>
 
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 15,
     borderWidth: 2,
-    borderColor: '#000',
+    borderColor: '#E99D42',
     backgroundColor: '#E99D42',
     borderRadius: 10,
     margin: 10,
@@ -79,6 +79,7 @@ const styles = StyleSheet.create({
   userInfo: {
     flexDirection: 'column',
     padding: 15,
+    paddingLeft: '15%'
   },
   username: {
     fontSize: 18,
