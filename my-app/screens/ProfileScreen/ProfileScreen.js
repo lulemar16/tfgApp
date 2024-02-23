@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Image, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { View, TextInput, Button, Image, TouchableOpacity, Text, StyleSheet, ScrollView } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import * as ImagePicker from 'expo-image-picker';
 
-const ProfileScreen = ({ navigation }) => {
+export default function ProfileScreen({navigation} ) {
+
   const [newPassword, setNewPassword] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [profileImage, setProfileImage] = useState(null);
 
   const handleChangePassword = () => {
     // Implement password change logic using Firebase Authentication
@@ -21,20 +25,54 @@ const ProfileScreen = ({ navigation }) => {
     }
   };
 
+  const pickImage = async () => {
+    // Request permission to access the image library
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    
+    if (status !== 'granted') {
+      alert('Sorry, we need camera roll permissions to make this work!');
+      return;
+    }
+
+    // Launch the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    console.log(result);
+
+    if (!result.canceled && result.assets.length > 0) {
+      setProfileImage(result.assets[0].uri);
+    }
+  };
+
   return (
+    <ScrollView>
     <View style={styles.container}>
       {/* Profile Picture Section */}
       <View style={styles.profilePictureSection}>
-        <Image source={{ uri: 'user-profile-photo-url' }} style={styles.profileImage} />
-        <TouchableOpacity style={styles.changePictureButton}>
-          <Text style={styles.changePictureButtonText}>Change Picture</Text>
-        </TouchableOpacity>
+        {/* Profile icon */}
+        {/* <Icon name="account-circle" size={150} color="#555" /> */}
+        {/* Profile image */}
+        <Image source={{ uri: profileImage }} style={styles.profileImage} /> 
+        <View style={styles.buttonSection}>
+          <TouchableOpacity style={styles.changePictureButton} onPress={pickImage}>
+            <Text style={styles.changePictureButtonText}>Change photo</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.changePictureButton}>
+            <Text style={styles.changePictureButtonText}>Edit profile</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* User Information Section */}
       <View style={styles.userInfoSection}>
         <Text style={styles.userInfoLabel}>Name: John Doe</Text>
         <Text style={styles.userInfoLabel}>Username: @johndoe</Text>
+        <Text style={styles.userInfoLabel}>Email: email@johndoe.com</Text>
         <Text style={styles.userInfoLabel}>Gender: Male</Text>
       </View>
 
@@ -65,8 +103,10 @@ const ProfileScreen = ({ navigation }) => {
         <Text style={styles.logoutButtonText}>Log Out</Text>
       </TouchableOpacity>
     </View>
+    </ScrollView>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -75,17 +115,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   profilePictureSection: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
     marginBottom: 20,
   },
   profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    margin:20
+  },
+  buttonSection:{
+    flexDirection: 'row'
   },
   changePictureButton: {
-    marginLeft: 20,
+    margin: 10,
     backgroundColor: '#E99D42',
     padding: 10,
     borderRadius: 5,
@@ -96,7 +140,8 @@ const styles = StyleSheet.create({
   userInfoSection: {
     marginBottom: 20,
     justifyContent: 'left',
-    marginLeft: 2
+    marginLeft: 2,
+    fontSize: 18
   },
   userInfoLabel: {
     fontSize: 16,
@@ -116,10 +161,10 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     marginTop: 20,
+    marginBottom: 20
   },
   logoutButtonText: {
-    color: '#E99D42', // Change the color as needed
+    color: '#E99D42', 
   },
 });
 
-export default ProfileScreen;
