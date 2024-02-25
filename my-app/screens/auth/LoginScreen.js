@@ -1,11 +1,13 @@
 // screens/LoginScreen.js
 import React, { useState } from 'react';
-import { StyleSheet, View, TextInput, Button, Touchable } from 'react-native';
+import { StyleSheet, View, TextInput, TouchableOpacity } from 'react-native';
 import { logIn } from '../../services/AuthService';
-import { Text } from '@rneui/base';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import {useNavigation} from "@react-navigation/native";
+import { Button, Text } from '@rneui/base';
 
 const LoginScreen = (props) => {
+
+  const navigation = useNavigation();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -33,13 +35,11 @@ const LoginScreen = (props) => {
         </TouchableOpacity>
       <View style={styles.container}>
         <Text>Don't have an account yet?</Text>
-        <TouchableOpacity style={styles.signUpButton} onPress={()=>props.navigation.navigate('SignUp')}>
-            <Text>
-                Sign up
-            </Text>
-        </TouchableOpacity>
+        <Button style={styles.signUpButton} 
+        onPress={() => navigation.navigate('Signup')}>
+            Sign-up
+        </Button>
       </View>
-      
     </View>
   );
 };
@@ -82,9 +82,9 @@ const styles = StyleSheet.create({
   },
   signUpButton: {
     backgroundColor: '#E99D42',
-    borderColor: '#F4CE98',
+    borderColor: '#E99D42',
     borderWidth: 3,
-    borderRadius: 20,
+    borderRadius: 5,
     marginLeft: 20,
     marginRight: 20,
     marginTop: 20,

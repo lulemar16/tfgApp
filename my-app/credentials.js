@@ -1,4 +1,3 @@
-//credentials.js
 // Import the functions you need from the SDKs you need
 import { firebase, initializeApp}  from "firebase/app";
 import 'firebase/auth';

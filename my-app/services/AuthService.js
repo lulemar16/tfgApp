@@ -1,28 +1,36 @@
 // services/AuthService.js
 import appFirebase from '../credentials';
-import { initializeAuth, createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
+import { initializeAuth, createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, onAuthStateChanged} from 'firebase/auth';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
+// import auth from '@react-native-firebase/auth';
 
-
-export const signUp = async (email, password) => {
-  try {
-    const auth = initializeAuth(appFirebase, {
-      persistence: getReactNativePersistence(ReactNativeAsyncStorage)
-    });
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    return userCredential.user;
-  } catch (error) {
-    throw error;
-  }
-};
+const auth = getAuth();
 
 export const logIn = async (email, password) => {
-  try {
-    const userCredential = await appFirebase.auth().signInWithEmailAndPassword(email, password);
-    return userCredential.user;
-  } catch (error) {
-    throw error;
-  }
+  signInWithEmailAndPassword(auth, email, password)
+  .then((userCredential) => {
+    // Signed in 
+    const user = userCredential.user;
+    // ...
+  })
+  .catch((error) => {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+  });
+};
+
+export const signUp = async (username, email, password) => {
+  createUserWithEmailAndPassword(auth, email, password)
+  .then((userCredential) => {
+    // Signed in 
+    const user = userCredential.user;
+    // ...
+  })
+  .catch((error) => {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    // ..
+  });
 };
 
 export const logOut = async () => {
@@ -32,3 +40,15 @@ export const logOut = async () => {
     throw error;
   }
 };
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // User is signed in, see docs for a list of available properties
+    // https://firebase.google.com/docs/reference/js/auth.user
+    const uid = user.uid;
+    // ...
+  } else {
+    // User is signed out
+    // ...
+  }
+});

@@ -9,19 +9,23 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@react-native-async-storage/async-storage": "1.18.2",
+    "@react-native-async-storage/async-storage": "^1.18.2",
     "@react-native-community/checkbox": "^0.5.17",
     "@react-native-community/datetimepicker": "7.2.0",
+    "@react-native-firebase/app": "^18.9.0",
+    "@react-native-firebase/auth": "^18.9.0",
     "@react-navigation/bottom-tabs": "^6.5.11",
     "@react-navigation/native": "^6.1.9",
     "@react-navigation/native-stack": "^6.9.18",
+    "@react-navigation/stack": "^6.3.21",
     "@rneui/base": "^4.0.0-rc.8",
     "dayjs": "^1.11.10",
     "deprecated-react-native-prop-types": "^5.0.0",
     "expo": "~49.0.15",
     "expo-av": "~13.4.1",
+    "expo-image-picker": "~14.3.2",
     "expo-status-bar": "~1.6.0",
-    "firebase": "^10.6.0",
+    "firebase": "^10.8.0",
     "react": "18.2.0",
     "react-native": "0.72.10",
     "react-native-gesture-handler": "~2.12.0",
@@ -35,8 +39,7 @@
     "react-native-video": "^5.2.1",
     "react-native-webview": "13.2.2",
     "react-native-youtube": "^2.0.2",
-    "react-native-youtube-iframe": "^2.3.0",
-    "expo-image-picker": "~14.3.2"
+    "react-native-youtube-iframe": "^2.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
@@ -44,16 +47,16 @@
   },
   "expo": {
     "plugins": [
-      [
-        "expo-av",
-        {
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
-        },
-        "expo-image-picker",
-        {
-          "photosPermission": "The app accesses your photos to let you share them with your friends."
-        }
-      ]
+      "expo-av",
+      {
+        "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
+      },
+      "expo-image-picker",
+      {
+        "photosPermission": "The app accesses your photos to let you share them with your friends."
+      },
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth"
     ]
   },
   "private": true
