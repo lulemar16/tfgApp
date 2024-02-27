@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, TouchableOpacity, Text, StyleSheet, CheckBox } from 'react-native';
+import CreateList from './CreateList';
 
 import { ListItem } from '@rneui/base';
 import { ListItemChevron } from '@rneui/base/dist/ListItem/ListItem.Chevron';
@@ -53,10 +54,8 @@ export default function Todos(props) {
   return (
     <ScrollView style={styles.container}>
       <TouchableOpacity
-        style={styles.button}
-        onPress={() => props.navigation.navigate('Create')}
-      >
-        <Text style={styles.buttonText}>Add new ToDo list</Text>
+        style={styles.button}>
+        <CreateList></CreateList>
       </TouchableOpacity>
 
       {todos.map((todo) => (

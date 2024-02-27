@@ -1,5 +1,6 @@
 import { Text, StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
 import React, { useState, useEffect } from 'react';
+import CreateNote from './CreateNote';
 
 import { ListItem } from '@rneui/base';
 import { ListItemChevron } from '@rneui/base/dist/ListItem/ListItem.Chevron';
@@ -42,10 +43,8 @@ export default function Notes(props) {
   return (
     <ScrollView style={styles.container}>
       <TouchableOpacity
-        style={styles.button}
-        onPress={() => props.navigation.navigate('Create')}
-      >
-        <Text style={styles.buttonText}>Add new note</Text>
+        style={styles.button}>
+        <CreateNote></CreateNote>
       </TouchableOpacity>
 
       {list.map((note) => (

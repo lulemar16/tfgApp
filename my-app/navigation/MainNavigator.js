@@ -6,6 +6,7 @@ import AudioScreen from '../screens/RecordingsScreen/AudioScreen';
 import ClockScreen from '../screens/ClockScreen/ClockScreen';
 import SettingsScreen from '../screens/SettingsScreen/SettingsScreen';
 import HomeStackScreen from '../stacks/HomeStack';
+import NotesStackScreen from '../stacks/NotesStack';
 
 const Tab = createBottomTabNavigator();
 
@@ -22,8 +23,8 @@ export default function MainNavigator() {
       }}
     >
       <Tab.Screen
-        name="Notes"
-        component={NotesScreen}
+        name="Workspace"
+        component={NotesStackScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="border-color" color={color} size={size} />

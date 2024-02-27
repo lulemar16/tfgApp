@@ -1,16 +1,19 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import HomeScreen from '../screens/HomeScreen/HomeScreen';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import LoginScreen from '../screens/auth/LoginScreen';
 import SignUpScreen from  '../screens/auth/SignUpScreen';
+import HomeScreen from '../screens/HomeScreen/HomeScreen';
+import MainNavigator from './MainNavigator';
 
-const Stack = createStackNavigator();
+const authNav = createMaterialTopTabNavigator();
 
 export default function AuthNavigator() {
   return(
-    <Stack.Navigator>
-      <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="Signup" component={SignUpScreen} />
-    </Stack.Navigator>
+    <authNav.Navigator>
+      <authNav.Screen name="Login" component={LoginScreen} />
+      <authNav.Screen name="Signup" component={SignUpScreen} />
+      <authNav.Screen name="Main" component={MainNavigator} />
+    </authNav.Navigator>
   );
 };

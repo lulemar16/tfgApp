@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, Image, TouchableOpacity, Text, StyleSheet, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as ImagePicker from 'expo-image-picker';
+
+import { onAuthStateChanged } from '@firebase/auth';
+import { auth } from '../../services/AuthService'; 
 
 export default function ProfileScreen({navigation} ) {
 
@@ -9,6 +12,17 @@ export default function ProfileScreen({navigation} ) {
   const [currentPassword, setCurrentPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [profileImage, setProfileImage] = useState(null);
+
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+    });
+
+    // Cleanup the subscription when the component unmounts
+    return () => unsubscribe();
+  }, []);
 
   const handleChangePassword = () => {
     // Implement password change logic using Firebase Authentication
@@ -46,6 +60,8 @@ export default function ProfileScreen({navigation} ) {
 
     if (!result.canceled && result.assets.length > 0) {
       setProfileImage(result.assets[0].uri);
+      user.photoURL = profileImage;
+      // console.log('image url:', user.photoURL)
     }
   };
 

@@ -1,36 +1,75 @@
-import React from 'react';
-import { Text, StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Text, StyleSheet, View, ScrollView, TouchableOpacity, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import YouTubePlayer from 'react-native-youtube-iframe';
 import CarouselComponent from './CarrouselImages';
 import {useNavigation} from "@react-navigation/native";
 import { Button } from '@rneui/base';
 
+import { onAuthStateChanged } from '@firebase/auth';
+import { auth } from '../../services/AuthService'; 
+
 export default function HomeScreen() {
+
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      console.log('USER:', user)
+      if (user) {
+        console.log('EMAIL:', user.email)
+        console.log('url:', user.photoURL)
+      }
+    });
+
+    // Cleanup the subscription when the component unmounts
+    return () => unsubscribe();
+  }, []);
 
   const navigation = useNavigation();
 
   return (
     <ScrollView style={styles.container}>
       {/* Profile */}
-      <View style={styles.profileSection}>
+      {user ? (
+        <View style={styles.profileSection}>
+
+            {/* Profile image */}
+            <Image
+              style={styles.profileImage}
+              source={{ uri: user.photoURL }} // Replace 'URL_DE_TU_IMAGEN' with the URL of your profile image
+            />
+
+            {/* User information */}
+            <View style={styles.userInfo}>
+              <Text style={styles.username}>{user.email}</Text>
+              <Text style={styles.followersCount}>1000 followers</Text>
+            </View>
+            
+            <Button style={styles.profileButton} 
+            onPress={() => navigation.navigate('Profile')}>
+              PROFILE
+            </Button>
+        </View>
+      ) : (
+        <View style={styles.profileSection}>
+
           {/* Profile icon */}
-          <Icon name="account-circle" size={70} color="#555" />
-          {/* Profile image */}
-          {/* <Image
-            style={styles.profileImage}
-            source={{ uri: 'URL_DE_TU_IMAGEN' }} // Replace 'URL_DE_TU_IMAGEN' with the URL of your profile image
-          /> */}
-          {/* User information */}
+          {/* <Icon name="account-circle" size={70} color="#555" /> */}
+
+          {/* User information */}          
           <View style={styles.userInfo}>
-            <Text style={styles.username}>@username</Text>
+            <Text style={styles.username}>user</Text>
             <Text style={styles.followersCount}>1000 followers</Text>
           </View>
+          
           <Button style={styles.profileButton} 
           onPress={() => navigation.navigate('Profile')}>
             PROFILE
           </Button>
       </View>
+      )}
 
       {/* Video Section */}
       <View style={styles.videoSection}>

@@ -8,7 +8,7 @@ import appFirebase from '../../credentials';
 import {getFirestore, collection, addDoc, getDocs, doc, deleteDoc, getDoc, setDoc} from 'firebase/firestore';
 const db = getFirestore(appFirebase)
 
-export default function CreateNote(props) {
+export default function CreateList(props) {
 
   const initialState = {
     title: '',
@@ -94,7 +94,7 @@ export default function CreateNote(props) {
   return (
     <View style={styles.containerFather}>
       <TouchableOpacity onPress={toggleCreate}>
-        <Text style={styles.header}>Add new note</Text>
+        <Text style={styles.header}>Add new list</Text>
       </TouchableOpacity>
       {showCreate && (
         <View style={styles.card}>

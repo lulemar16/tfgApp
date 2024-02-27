@@ -13,14 +13,14 @@ const LoginScreen = (props) => {
   const [password, setPassword] = useState('');
 
   const handleLogin = async () => {
-    try {
-      const user = await logIn(email, password);
-      console.log('User logged in:', user);
-      // Navigate to the next screen or perform additional actions upon successful signup
-      props.navigation.navigate('Notes')
-    } catch (error) {
-      console.error('Login error:', error.message);
-    }
+    logIn(email, password)
+    .then(() => {
+      console.log('User logged in:', email);
+    })
+    .catch(error => {
+      console.group(error)
+      Alert.alert(error.message)
+    });
   };
 
   return (

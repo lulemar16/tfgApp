@@ -1,35 +1,36 @@
-// services/AuthService.js
-import appFirebase from '../credentials';
-import { initializeAuth, createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, onAuthStateChanged} from 'firebase/auth';
-import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
-// import auth from '@react-native-firebase/auth';
+import appFirebase from '../firebaseConfig';
+import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { Alert } from 'react-native';
 
 const auth = getAuth();
+const db = getFirestore();
 
-export const logIn = async (email, password) => {
-  signInWithEmailAndPassword(auth, email, password)
+export const signUp = async (email, password) => {
+
+  createUserWithEmailAndPassword(auth, email, password)
   .then((userCredential) => {
-    // Signed in 
+    console.log('Account created')
     const user = userCredential.user;
-    // ...
+    console.log('User:', user)
   })
-  .catch((error) => {
-    const errorCode = error.code;
-    const errorMessage = error.message;
+  .catch(error => {
+    console.group(error)
+    Alert.alert(error.message)
   });
 };
 
-export const signUp = async (username, email, password) => {
-  createUserWithEmailAndPassword(auth, email, password)
+export const logIn = async (email, password) => {
+
+  signInWithEmailAndPassword(auth, email, password)
   .then((userCredential) => {
-    // Signed in 
+    console.log('Logged in')
     const user = userCredential.user;
-    // ...
+    console.log('User:', user)
   })
-  .catch((error) => {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    // ..
+  .catch(error => {
+    console.group(error)
+    Alert.alert(error.message)
   });
 };
 
@@ -43,8 +44,7 @@ export const logOut = async () => {
 
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    // User is signed in, see docs for a list of available properties
-    // https://firebase.google.com/docs/reference/js/auth.user
+    // User is signed in
     const uid = user.uid;
     // ...
   } else {
@@ -52,3 +52,5 @@ onAuthStateChanged(auth, (user) => {
     // ...
   }
 });
+
+export { auth };

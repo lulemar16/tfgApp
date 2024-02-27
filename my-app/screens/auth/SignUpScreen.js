@@ -15,9 +15,10 @@ const SignUpScreen = () => {
 
   const handleSignUp = async () => {
     try {
-      const user = await signUp(username, email, password);
+      const user = signUp(email, password);
       console.log('User signed up:', user);
       // Navigate to the next screen or perform additional actions upon successful signup
+      navigation.navigate('Login')
     } catch (error) {
       console.error('Sign-up error:', error.message);
       // Handle the error (e.g., display an error message to the user)
