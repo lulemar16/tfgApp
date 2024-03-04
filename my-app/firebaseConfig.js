@@ -1,4 +1,5 @@
 import { initializeApp } from '@firebase/app';
+import { getFirestore } from 'firebase/firestore';
 import { getAuth } from "firebase/auth";
 
 // Initialize Firebase
@@ -15,4 +16,7 @@ const firebaseConfig = {
 const appFirebase = initializeApp(firebaseConfig);
 // For more information on how to access Firebase in your project,
 // see the Firebase documentation: https://firebase.google.com/docs/web/setup#access-firebase
+const db = getFirestore(appFirebase);
 const auth = getAuth(appFirebase);
+
+export { db, auth };

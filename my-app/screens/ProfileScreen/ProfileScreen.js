@@ -5,6 +5,12 @@ import * as ImagePicker from 'expo-image-picker';
 
 import { onAuthStateChanged } from '@firebase/auth';
 import { auth } from '../../services/AuthService'; 
+import { updatePassword } from '@firebase/auth';
+import { EmailAuthProvider, reauthenticateWithCredential } from '@firebase/auth';
+
+import { Alert } from 'react-native';
+import { logOut } from '../../services/AuthService';
+
 
 export default function ProfileScreen({navigation} ) {
 
@@ -24,14 +30,41 @@ export default function ProfileScreen({navigation} ) {
     return () => unsubscribe();
   }, []);
 
-  const handleChangePassword = () => {
-    // Implement password change logic using Firebase Authentication
+  const handleChangePassword = async () => {
+    try {
+      // Check if the user is authenticated
+      if (user) {
+        // Re-authenticate the user before changing the password
+        // You need to prompt the user to enter their current password again
+        const credentials = EmailAuthProvider.credential(
+          user.email,
+          currentPassword
+        );
+        
+        await reauthenticateWithCredential(auth.currentUser, credentials);
+  
+        // Now that the user is re-authenticated, update the password
+        await updatePassword(auth.currentUser, newPassword);
+        
+        // Clear the password fields
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+  
+        Alert.alert('Success', 'Password updated successfully!');
+      } else {
+        console.error('User not authenticated.');
+      }
+    } catch (error) {
+      console.error('Change password error:', error.message);
+      Alert.alert('Error', `Failed to update password: ${error.message}`);
+    }
   };
 
   const handleLogOut = async () => {
     try {
       // Implement logOut logic using Firebase Authentication or your preferred method
-      // await logOut();
+      await logOut(auth); // Assuming you have the `signOut` method available from Firebase
       // Navigate to the login screen or any other desired screen upon successful logout
       navigation.navigate('Login');
     } catch (error) {
@@ -86,10 +119,7 @@ export default function ProfileScreen({navigation} ) {
 
       {/* User Information Section */}
       <View style={styles.userInfoSection}>
-        <Text style={styles.userInfoLabel}>Name: John Doe</Text>
-        <Text style={styles.userInfoLabel}>Username: @johndoe</Text>
         <Text style={styles.userInfoLabel}>Email: email@johndoe.com</Text>
-        <Text style={styles.userInfoLabel}>Gender: Male</Text>
       </View>
 
       {/* Change Password Section */}

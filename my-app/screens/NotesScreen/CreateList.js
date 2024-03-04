@@ -1,235 +1,106 @@
-import { Text, StyleSheet, View, TextInput, TouchableOpacity, Alert} from 'react-native'
-import React, { useState, useEffect } from 'react'
-import DateTimePicker from '@react-native-community/datetimepicker'
-import { Platform } from 'react-native'
+// TodoListsScreen.js
 
-
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import appFirebase from '../../credentials';
-import {getFirestore, collection, addDoc, getDocs, doc, deleteDoc, getDoc, setDoc} from 'firebase/firestore';
-const db = getFirestore(appFirebase)
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { db } from '../../firebaseConfig';
 
-export default function CreateList(props) {
+export default function TodoListsScreen() {
+  const [lists, setLists] = useState([]);
+  const [newListTitle, setNewListTitle] = useState('');
 
-  const initialState = {
-    title: '',
-    detail: ''
-  }
+  useEffect(() => {
+    const unsubscribe = db.collection('lists').onSnapshot(snapshot => {
+      const listsData = [];
+      snapshot.forEach(doc => listsData.push({ ...doc.data(), id: doc.id }));
+      setLists(listsData);
+    });
+    return () => unsubscribe();
+  }, []);
 
-  const [date, setDate] = useState(new Date(1598051730000));
-  const [mode, setMode] = useState("date");
-  const [show, setShow] = useState(false);
-  const [text, setText] = useState("empty");  
-  const [day, setDay] = useState("");
-  const [time, setTime] = useState("");
-  const [state, setState] = useState(initialState);
-  const [showCreate, setShowCreate] = useState(false);
-
-  const toggleCreate = () => {
-    setShowCreate(!showCreate);
+  const addList = async () => {
+    if (newListTitle.trim() !== '') {
+      await addDoc(collection(db, 'lists'), { title: newListTitle, createdAt: new Date() });
+      setNewListTitle('');
+    }
   };
 
-  const onChange = (event, selectDate) => {
-    const currentDate = selectDate || date;
-    setShow(Platform.OS === "ios");
-    setDate(currentDate);
-
-    let tempDate = new Date(currentDate);
-
-    let fDate = 
-      tempDate.getDate() + "/" +
-      (tempDate.getMonth() + 1 ) + "/" +
-      tempDate.getFullYear();
-
-    setDay(fDate);
-
-    let fTime = 
-      tempDate.getHours() + ":"
-      + tempDate.getMinutes();
-    // setText(fDate + " " + fTime)
-    setTime(fTime);
-  }
-
-  const showMode = (currentDate) => {
-    setShow(true);
-    setMode(currentDate);
-  }
-
-  const handleChangeText = (value, name) => {
-    setState({...state, [name]:value})
-  }
-
-  // const saveNote = () => {
-  //   const note = {
-  //     title: state.title,
-  //     detail: state.detail,
-  //     day: day,
-  //     time: time
-  //   }
-  //   console.log(note);
-  // }
-
-  const saveNote = async() => {
-    try {
-      if(state.title === '' || state.detail === '') {
-        Alert.alert('Important message', 'You should fill the form')
-      }
-      else {
-        const note = {
-          title: state.title,
-          detail: state.detail,
-          day: day,
-          time: time
-        }
-        await addDoc(collection(db, 'notes'), {
-          ...note
-        })
-        Alert.alert('Done', 'Save completed')
-        props.navigation.navigate('Notes')
-      }
-    } catch (error) {
-      console.log(error)
-    }
-  }
+  const renderList = ({ item }) => (
+    <TouchableOpacity style={styles.listItem}>
+      <Text style={styles.listTitle}>{item.title}</Text>
+    </TouchableOpacity>
+  );
 
   return (
-    <View style={styles.containerFather}>
-      <TouchableOpacity onPress={toggleCreate}>
-        <Text style={styles.header}>Add new list</Text>
-      </TouchableOpacity>
-      {showCreate && (
-        <View style={styles.card}>
-          <View style={styles.container}>
-            <TextInput 
-              placeholder='Title' 
-              style={styles.inputText} 
-              value={state.title}
-              onChangeText={(value)=>handleChangeText(value, 'title')}
-            />
-
-            <TextInput 
-              placeholder='Note' 
-              multiline={true} 
-              numberOfLines={8} 
-              style={styles.inputText}
-              value={state.detail} 
-              onChangeText={(value)=>handleChangeText(value, 'detail')}
-            />
-            
-            {/* date container */}
-            <View style={styles.inputDate}>
-              <TextInput placeholder='05/11/2023' style={styles.dateText} value={day}/>
-              <TouchableOpacity style={styles.dateButton} onPress={() => showMode("date")}>
-                <Text style={styles.subtitle}>Date</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* time container */}
-            {/* <View style={styles.inputDate}>
-              <TextInput placeholder='Hour: 11 ; Minutes: 11' style={styles.dateText} value={time}/>
-              <TouchableOpacity style={styles.dateButton} onPress={() => showMode("time")}>
-                <Text style={styles.subtitle}>Time</Text>
-              </TouchableOpacity>
-            </View> */}
-
-            {show && (
-              <DateTimePicker
-                testID='dateTimePicker'
-                value={date}
-                mode = {mode}
-                is24Hour={true}
-                display='default'
-                onChange={onChange}
-                minimumDate={new Date("2023-1-1")}
-              />
-            )}
-
-            {/* button to save the data */}
-            <View style={styles.inputDate}>
-              <TouchableOpacity style={styles.saveButton} onPress={saveNote}>
-                <Text style={styles.saveText}>
-                  Save note
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-          </View>
-        </View>
-      )}
+    <View style={styles.container}>
+      <Text style={styles.header}>To-Do Lists</Text>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.inputText}
+          placeholder="Enter list title"
+          value={newListTitle}
+          onChangeText={text => setNewListTitle(text)}
+        />
+        <TouchableOpacity style={styles.addButton} onPress={addList}>
+          <Text style={styles.addButtonText}>Add List</Text>
+        </TouchableOpacity>
       </View>
-  )
-  
+      <FlatList
+        data={lists}
+        keyExtractor={item => item.id}
+        renderItem={renderList}
+        style={styles.listsContainer}
+      />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-  containerFather: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems:'center'
-  },
-  card: {
-    margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    width: '90%',
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation:5
-  },
   container: {
-    padding:20
+    flex: 1,
+    padding: 20,
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    marginBottom: 20,
   },
   inputText: {
-    borderColor: '#F4CE98',
-    borderWidth: 1,
-    padding: 8, 
-    marginTop:10,
-    borderRadius:8
-  },
-  inputDate: {
-    width: '100%',
-    flexWrap: 'wrap',
-    flexDirection: 'row'
-  },
-  dateButton: {
-    backgroundColor: '#E99D42',
-    borderColor: '#E99D42',
-    borderWidth: 3,
-    borderRadius: 20,
-    margin: 15,
-    padding:10,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  dateText: {
-    borderColor: '#F4CE98',
+    flex: 1,
+    borderColor: '#ccc',
     borderWidth: 1,
     padding: 10,
-    marginTop: 10,
-    borderRadius: 8
+    borderRadius: 8,
+    marginRight: 10,
   },
-  subtitle: {
-    color: 'white',
-    fontSize:18
-  },
-  saveButton: {
+  addButton: {
     backgroundColor: '#E99D42',
-    borderColor: '#E99D42',
-    borderWidth: 3,
-    borderRadius: 20,
-    margin: 15,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  saveText: {
-    textAlign: 'center',
     padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addButtonText: {
     color: 'white',
-    fontSize: 16
-  }
-})
+    fontWeight: 'bold',
+  },
+  listsContainer: {
+    flex: 1,
+  },
+  listItem: {
+    backgroundColor: '#fff',
+    padding: 20,
+    marginBottom: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  listTitle: {
+    fontSize: 18,
+  },
+});

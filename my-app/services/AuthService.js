@@ -1,5 +1,5 @@
 import appFirebase from '../firebaseConfig';
-import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
+import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { Alert } from 'react-native';
 
@@ -34,13 +34,14 @@ export const logIn = async (email, password) => {
   });
 };
 
-export const logOut = async () => {
-  try {
-    await appFirebase.auth().signOut();
-  } catch (error) {
-    throw error;
-  }
-};
+export const logOut = (
+  
+  signOut(auth).then(() => {
+    // Sign-out successful.
+  }).catch((error) => {
+    // An error happened.
+  })
+);
 
 onAuthStateChanged(auth, (user) => {
   if (user) {

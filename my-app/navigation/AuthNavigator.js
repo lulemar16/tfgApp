@@ -13,7 +13,6 @@ export default function AuthNavigator() {
     <authNav.Navigator>
       <authNav.Screen name="Login" component={LoginScreen} />
       <authNav.Screen name="Signup" component={SignUpScreen} />
-      <authNav.Screen name="Main" component={MainNavigator} />
     </authNav.Navigator>
   );
 };
