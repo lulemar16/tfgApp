@@ -34,14 +34,12 @@ export const logIn = async (email, password) => {
   });
 };
 
-export const logOut = (
-  
-  signOut(auth).then(() => {
-    // Sign-out successful.
-  }).catch((error) => {
-    // An error happened.
-  })
-);
+export const logOut = () => {
+  // Implement your logout logic here
+  // For example, you can use Firebase Auth signOut method if you are using Firebase Auth
+  auth().signOut()
+  console.log('User logged out successfully');
+};
 
 onAuthStateChanged(auth, (user) => {
   if (user) {

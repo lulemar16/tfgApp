@@ -4,12 +4,11 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as ImagePicker from 'expo-image-picker';
 
 import { onAuthStateChanged } from '@firebase/auth';
-import { auth } from '../../services/AuthService'; 
-import { updatePassword } from '@firebase/auth';
+import { auth, logOut } from '../../services/AuthService'; 
+import { updatePassword, getAuth } from '@firebase/auth';
 import { EmailAuthProvider, reauthenticateWithCredential } from '@firebase/auth';
 
 import { Alert } from 'react-native';
-import { logOut } from '../../services/AuthService';
 
 
 export default function ProfileScreen({navigation} ) {
@@ -20,15 +19,18 @@ export default function ProfileScreen({navigation} ) {
   const [profileImage, setProfileImage] = useState(null);
 
   const [user, setUser] = useState(null);
+  // auth = getAuth();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-    });
+  // useEffect(() => {
+  //   const unsubscribe = auth.onAuthStateChanged(user => {
+  //     if (user) {
+  //       setUser(user);
+  //     }
+  //   })
 
-    // Cleanup the subscription when the component unmounts
-    return () => unsubscribe();
-  }, []);
+  //   // Cleanup the subscription when the component unmounts
+  //   return () => unsubscribe();
+  // }, []);
 
   const handleChangePassword = async () => {
     try {
@@ -62,14 +64,10 @@ export default function ProfileScreen({navigation} ) {
   };
 
   const handleLogOut = async () => {
-    try {
-      // Implement logOut logic using Firebase Authentication or your preferred method
-      await logOut(auth); // Assuming you have the `signOut` method available from Firebase
-      // Navigate to the login screen or any other desired screen upon successful logout
-      navigation.navigate('Login');
-    } catch (error) {
-      console.error('Logout error:', error.message);
-    }
+    auth
+    .signOut()
+    .then (() => navigation.navigate("Login"))
+    .catch(error => alert(error.message));
   };
 
   const pickImage = async () => {
@@ -93,7 +91,9 @@ export default function ProfileScreen({navigation} ) {
 
     if (!result.canceled && result.assets.length > 0) {
       setProfileImage(result.assets[0].uri);
-      user.photoURL = profileImage;
+      if (auth.currentUser){
+        auth.currentUser.photoURL = profileImage;
+      };
       // console.log('image url:', user.photoURL)
     }
   };
@@ -119,7 +119,7 @@ export default function ProfileScreen({navigation} ) {
 
       {/* User Information Section */}
       <View style={styles.userInfoSection}>
-        <Text style={styles.userInfoLabel}>Email: email@johndoe.com</Text>
+        <Text style={styles.userInfoLabel}>Email: {auth.currentUser?.email}</Text>
       </View>
 
       {/* Change Password Section */}
@@ -166,8 +166,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   profileImage: {
-    width: 200,
-    height: 200,
+    width: 170,
+    height: 170,
     borderRadius: 100,
     margin:20
   },

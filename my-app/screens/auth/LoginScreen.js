@@ -1,16 +1,27 @@
 // screens/LoginScreen.js
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity } from 'react-native';
+import { getAuth } from 'firebase/auth';
 import { logIn } from '../../services/AuthService';
-import {useNavigation} from "@react-navigation/native";
+import {useNavigation} from "@react-navigation/core";
 import { Button, Text } from '@rneui/base';
 
 const LoginScreen = (props) => {
 
   const navigation = useNavigation();
+  const auth = getAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  useEffect(()=>{
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      if (user) {
+        navigation.navigate("Home")
+      }
+    })
+    return unsubscribe
+  }, []);
 
   const handleLogin = async () => {
     logIn(email, password)
