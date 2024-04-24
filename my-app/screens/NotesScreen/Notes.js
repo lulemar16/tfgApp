@@ -1,17 +1,16 @@
 import { Text, StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import CreateNote from './CreateNote';
-
 import { ListItem } from '@rneui/base';
 import { ListItemChevron } from '@rneui/base/dist/ListItem/ListItem.Chevron';
 import { ListItemContent } from '@rneui/base/dist/ListItem/ListItem.Content';
 import { ListItemTitle } from '@rneui/base/dist/ListItem/ListItem.Title';
 import { ListItemSubtitle } from '@rneui/base/dist/ListItem/ListItem.Subtitle';
-
-import appFirebase from '../../credentials';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
-const db = getFirestore(appFirebase);
+const auth = getAuth();
+const db = getFirestore();
 
 export default function Notes(props) {
   const [list, setList] = useState([]);
@@ -20,7 +19,9 @@ export default function Notes(props) {
   useEffect(() => {
     const getList = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, 'notes'));
+        const userDocRef = doc(db, 'users', auth.currentUser.uid);
+        const userNotesCollectionRef = collection(userDocRef, 'notes');
+        const querySnapshot = await getDocs(userNotesCollectionRef);
         const docs = [];
         querySnapshot.forEach((doc) => {
           const { title, detail, day, time } = doc.data();
@@ -43,8 +44,12 @@ export default function Notes(props) {
   return (
     <ScrollView style={styles.container}>
       <TouchableOpacity
-        style={styles.button}>
-        <CreateNote></CreateNote>
+        style={styles.button}
+        onPress={() => {
+          props.navigation.navigate('CreateNote');
+        }}
+      >
+        <Text style={styles.buttonText}>New note</Text>
       </TouchableOpacity>
 
       {list.map((note) => (

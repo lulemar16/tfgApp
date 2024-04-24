@@ -1,125 +1,196 @@
-import React, { useState, useEffect } from 'react';
-import { View, ScrollView, TouchableOpacity, Text, StyleSheet, CheckBox } from 'react-native';
-import CreateList from './CreateList';
+import React, { useLayoutEffect, useState, useEffect } from "react";
+import {
+    StyleSheet,
+    Text,
+    View,
+    TouchableOpacity,
+    FlatList,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import Colors from "../../constants/Colors";
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, deleteDoc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import {useNavigation} from "@react-navigation/native";
 
-import { ListItem } from '@rneui/base';
-import { ListItemChevron } from '@rneui/base/dist/ListItem/ListItem.Chevron';
-import { ListItemContent } from '@rneui/base/dist/ListItem/ListItem.Content';
-import { ListItemTitle } from '@rneui/base/dist/ListItem/ListItem.Title';
-import { ListItemSubtitle } from '@rneui/base/dist/ListItem/ListItem.Subtitle';
+const auth = getAuth();
+const db = getFirestore();
+const userUID = auth.currentUser ? auth.currentUser.uid : "";
 
-import appFirebase from '../../credentials';
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
-const db = getFirestore(appFirebase);
-
-export default function Todos(props) {
-  const [todos, setTodos] = useState([]);
-
-  useEffect(() => {
-    const getTodos = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'todos'));
-        const todos = [];
-        querySnapshot.forEach((doc) => {
-          const { title, tasks } = doc.data();
-          todos.push({
-            id: doc.id,
-            title,
-            tasks: tasks || [],
-          });
-        });
-        setTodos(todos);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getTodos();
-  }, []);
-
-  const toggleTask = (todoId, taskId) => {
-    setTodos((prevTodos) =>
-      prevTodos.map((todo) =>
-        todo.id === todoId
-          ? {
-              ...todo,
-              tasks: todo.tasks.map((task) =>
-                task.id === taskId ? { ...task, completed: !task.completed } : task
-              ),
-            }
-          : todo
-      )
-    );
-  };
-
-  return (
-    <ScrollView style={styles.container}>
-      <TouchableOpacity
-        style={styles.button}>
-        <CreateList></CreateList>
-      </TouchableOpacity>
-
-      {todos.map((todo) => (
-        <ListItem
-          key={todo.id}
-          onPress={() => {
-            props.navigation.navigate('Details', { todoId: todo.id });
-          }}
-          style={styles.listItemContainer}
+const ListButton = ({ title, color, onPress, onDelete, onOptions }) => {
+    return (
+        <TouchableOpacity
+            style={[styles.itemContainer, { backgroundColor: color }]}
+            onPress={onPress}
         >
-          <ListItemChevron />
-          <ListItemContent>
-            <ListItemTitle style={styles.title}>{todo.title}</ListItemTitle>
-            {todo.tasks.map((task) => (
-              <View key={task.id} style={styles.taskContainer}>
-                <CheckBox
-                  value={task.completed}
-                  onValueChange={() => toggleTask(todo.id, task.id)}
-                />
-                <Text style={styles.taskTitle}>{task.title}</Text>
-              </View>
-            ))}
-          </ListItemContent>
-        </ListItem>
-      ))}
-    </ScrollView>
-  );
-}
+            <View>
+                <Text style={styles.itemTitle}>{title}</Text>
+            </View>
+            <View style={{ flexDirection: "row" }}>
+                <TouchableOpacity onPress={onOptions}>
+                    <Ionicons name="options-outline" size={24} color="white" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={onDelete}>
+                    <Ionicons name="trash-outline" size={24} color="white" />
+                </TouchableOpacity>
+            </View>
+        </TouchableOpacity>
+    );
+};
+
+export default function ToDoScreen ( ) {
+    const [lists, setLists] = useState([]);
+    // const userRef = doc(db, 'users', userUID);
+    // const listsRef = collection(userRef, 'lists');
+    const listsRef = collection(db, 'users', userUID, 'lists');
+
+    const fetchAndSortLists = async () => {
+      const listsQuery = query(listsRef, orderBy('index'));
+      const snapshot = await onSnapshot(listsQuery);
+      const sortedLists = snapshot.docs.map((doc) => doc.data());
+      return sortedLists;
+    };
+
+
+    const navigation = useNavigation();
+
+    useEffect(() => {
+        const unsubscribe = onSnapshot(listsRef, (snapshot) => {
+            const sortedLists = snapshot.docs.map((doc) => doc.data()).sort((a, b) => a.index - b.index);
+            setLists(sortedLists);
+        });
+    
+        return unsubscribe;
+    }, []);
+    
+
+    const addItemToLists = async ({ title, color }) => {
+        const lists = fetchAndSortLists();
+        const index = lists.length > 0 ? lists[lists.length - 1].index + 1 : 0;
+        const docRef = await addDoc(collection(db, 'users', userUID, 'lists'), {
+            title,
+            color,
+            index
+        });
+        console.log('Document written with ID: ', docRef.id);
+        const newData = {
+            id: docRef.id
+        };
+        updateDoc(docRef, newData);
+    };
+
+    const removeItemFromLists = async (id) => {
+        const docRef = doc(listsRef, id);
+        await deleteDoc(docRef);
+    };
+
+    const deleteList = async (id) => {
+        const listRef = doc(listsRef, id);
+        await deleteDoc(listRef);
+    };
+    
+
+    const updateItemFromLists = async (id, item) => {
+        await updateDoc(doc(listsRef, id), item);
+    };
+
+    return (
+        <View style={styles.container}>
+          <TouchableOpacity
+              onPress={() =>
+                  navigation.navigate("Edit", { saveChanges: addItemToLists })
+              }
+              style={styles.button}
+          >
+              <Text style={styles.buttonText}>New To-do</Text>
+          </TouchableOpacity>
+            <FlatList
+                data={lists}
+                renderItem={({ item: { title, color, id, index } }) => {
+                    return (
+                        <ListButton
+                            title={title}
+                            color={color}
+                            id={id}
+                            navigation={navigation}
+                            onPress={() => {
+                                navigation.navigate("ToDoList", {
+                                    title,
+                                    color,
+                                    listId: id,
+                                });
+                            }}
+                            // onPress={() => {console.log('id:' ,id)
+                            // }}
+                            onOptions={() => {
+                                navigation.navigate("Edit", {
+                                    title,
+                                    color,
+                                    saveChanges: (newItem) =>
+                                        updateItemFromLists(id, {
+                                            index,
+                                            ...newItem,
+                                        }),
+                                });
+                            }}
+                            onDelete={() => deleteList(id)}
+                        />
+                    );
+                }}
+            />
+        </View>
+    );
+};
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#f0f0f0',
-  },
-  button: {
-    backgroundColor: '#FCCA00',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 20,
-  },
-  buttonText: {
-    textAlign: 'center',
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  listItemContainer: {
-    marginBottom: 20,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 15,
-    elevation: 3,
-  },
-  title: {
-    fontWeight: 'bold',
-    marginLeft: 10,
-  },
-  taskContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 5,
-  },
-  taskTitle: {
-    marginLeft: 10,
-  },
+    container: {
+        flex: 1,
+        backgroundColor: "#fff",
+    },
+    button: {
+      backgroundColor: '#FCCA00',
+      padding: 10,
+      borderRadius: 5,
+      marginBottom: 20,
+    },
+    buttonText: {
+      textAlign: 'center',
+      color: 'white',
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    itemTitle: { fontSize: 24, padding: 5, color: "white" },
+    itemContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        height: 100,
+        flex: 1,
+        borderRadius: 20,
+        marginHorizontal: 20,
+        marginVertical: 10,
+        padding: 15,
+    },
+    icon: {
+        padding: 5,
+        fontSize: 24,
+    },
+    centeredView: {
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 50,
+    },
+    modalView: {
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 35,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
 });

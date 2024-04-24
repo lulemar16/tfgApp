@@ -1,5 +1,5 @@
 {
-  "expo": { 
+  "expo": {
     "name": "my-app",
     "slug": "my-app",
     "version": "1.0.0",
@@ -25,6 +25,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-build-properties"
+    ]
   }
 }

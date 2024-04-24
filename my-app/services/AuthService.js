@@ -1,6 +1,6 @@
 import appFirebase from '../firebaseConfig';
 import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
-import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc } from 'firebase/firestore';
 import { Alert } from 'react-native';
 
 const auth = getAuth();
@@ -10,9 +10,13 @@ export const signUp = async (email, password) => {
 
   createUserWithEmailAndPassword(auth, email, password)
   .then((userCredential) => {
-    console.log('Account created')
     const user = userCredential.user;
-    console.log('User:', user)
+    console.log('User:', user);
+    console.log('User uid:', user.uid);
+    addDoc(collection(db, "users"), {
+      id: user.uid,
+    });
+    console.log('Account created in firestore')
   })
   .catch(error => {
     console.group(error)

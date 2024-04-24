@@ -1,72 +1,182 @@
-import React, { useState, useEffect } from 'react';
-import { View, FlatList, Text, Button, StyleSheet } from 'react-native';
-import TodoItem from './TodoItem';
-import { db } from '../../firebaseConfig';
+import React, { useState, useLayoutEffect, useEffect } from "react";
+import {
+    StyleSheet,
+    Text,
+    View,
+    TouchableOpacity,
+    FlatList,
+} from "react-native";
+import ToDoItem from "../../components/ToDoItem";
+import Colors from "../../constants/Colors";
+import { getFirestore, doc, collection, onSnapshot, orderBy, query, addDoc, deleteDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
-const TodoList = ({ list, onAddTodo, onUpdateTodo, onDeleteTodo }) => {
-  const [todos, setTodos] = useState([]);
+const auth = getAuth();
+const db = getFirestore();
+const userUID = auth.currentUser ? auth.currentUser.uid : "";
 
-  useEffect(() => {
-    const unsubscribe = db
-      .collection('lists')
-      .doc(list.id)
-      .collection('todos')
-      .orderBy('createdAt')
-      .onSnapshot(snapshot => {
-        const todosData = [];
-        snapshot.forEach(doc => todosData.push({ ...doc.data(), id: doc.id }));
-        setTodos(todosData);
-      });
+export default ({ navigation, route }) => {
+    const [toDoItems, setToDoItems] = useState([]);
+    const [newItem, setNewItem] = useState(null);
 
-    return () => unsubscribe();
-  }, [list]);
+    // const toDoItemsRef = collection(
+    //     db,
+    //     'users',
+    //     userUID,
+    //     'lists',
+    //     route.params.listId,
+    //     'todoItems'
+    // );
 
+    const toDoItemsRef = collection(
+        doc(db, 'users', userUID, 'lists', route.params.listId),
+        'todoItems'
+    );
+    
+    // useEffect(() => {
+    //     if (newItem) {
+    //         setToDoItems([newItem, ...toDoItems]);
+    //     }
+    // }, [newItem, toDoItems]);
 
-  const addTodo = async (text) => {
-    await db.collection('lists').doc(list.id).collection('todos').add({
-    text,
-    createdAt: new Date(),
-    completed: false, // Set the initial completed state
-    });
-  };
-  
+    // useEffect(() => {
+    //     const unsubscribe = onSnapshot(
+    //         query(toDoItemsRef, orderBy('isChecked', 'desc')),
+    //         (snapshot) => {
+    //             const newToDoItems = snapshot.docs.map((doc) => doc.data());
+    //             setToDoItems(newToDoItems);
+    //         }
+    //     );
 
-  const updateTodo = async (todo) => {
-    await db.collection('lists').doc(list.id).collection('todos').doc(todo.id).update(todo);
-  };
+    //     return () => unsubscribe();
+    // }, []);
 
-  const deleteTodo = async id => {
-    await db.collection('lists').doc(list.id).collection('todos').doc(id).delete();
-  };
+    // useEffect(() => {
+    //     const unsubscribe = onSnapshot(
+    //         query(toDoItemsRef, orderBy('isChecked', 'desc')),
+    //         (snapshot) => {
+    //             const newToDoItems = snapshot.docs.map((doc) => doc.data());
+    //             setToDoItems(newToDoItems);
+    //         }
+    //     );
 
-  return (
-    <View style={styles.list}>
-      <Text style={styles.title}>{list.title}</Text>
-      <Button title="Add Todo" onPress={() => addTodo('')} />
-      <FlatList
-        data={todos}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <TodoItem
-            todo={item}
-            onUpdate={text => updateTodo({ ...item, text })}
-            onDelete={() => deleteTodo(item.id)}
-          />
-        )}
-      />
-    </View>
-  );
+    //     return () => unsubscribe();
+    // }, [toDoItemsRef]); // Make sure to include toDoItemsRef as a dependency
+
+    useEffect(() => {
+        const unsubscribe = onSnapshot(
+            query(toDoItemsRef, orderBy('isChecked', 'desc')),
+            (snapshot) => {
+                const newToDoItems = snapshot.docs.map((doc) => doc.data());
+                setToDoItems(newToDoItems);
+            }
+        );
+
+        return () => unsubscribe();
+    }, [toDoItemsRef]);
+
+    useEffect(() => {
+        if (newItem) {
+            // Add the new item to the beginning of the list
+            setToDoItems((prevItems) => [newItem, ...prevItems]);
+        }
+    }, [newItem]);
+
+    const addItemToLists = async () => {
+        console.log('----2')
+        setNewItem({ text: '', isChecked: false, new: true });
+        console.log('-----', newItem)
+    };
+
+    const removeItemFromLists = async (index) => {
+        const itemToRemove = toDoItems[index];
+        await deleteDoc(doc(toDoItemsRef, itemToRemove.id));
+    };
+
+    return (
+        <View style={styles.container}>
+            <TouchableOpacity style={styles.button} onPress={() => addItemToLists()}>
+                <Text style={styles.buttonText}>+</Text>
+            </TouchableOpacity>
+            <FlatList
+                data={toDoItems}
+                renderItem={({
+                    item: { id, text, isChecked, ...params },
+                    index,
+                }) => {
+                    return (
+                        <ToDoItem
+                            {...params}
+                            text={text}
+                            isChecked={isChecked}
+                            onChecked={() => {
+                                let data = { text, isChecked: !isChecked };
+                                if (id) {
+                                    data.id = id;
+                                }
+                                addDoc(toDoItemsRef, data);
+                            }}
+                            onChangeText={(newText) => {
+                                if (params.new) {
+                                    setNewItem({
+                                        text: newText,
+                                        isChecked,
+                                        new: params.new,
+                                    });
+                                } else {
+                                    toDoItems[index].text = newText;
+                                    setToDoItems([...toDoItems]);
+                                }
+                            }}
+                            onDelete={() => {
+                                params.new
+                                    ? setNewItem(null)
+                                    : removeItemFromLists(index);
+                                id && deleteDoc(doc(toDoItemsRef, id));
+                            }}
+                            onBlur={() => {
+                                if (text.length > 1) {
+                                    let data = { text, isChecked };
+                                    if (id) {
+                                        data.id = id;
+                                    }
+                                    addDoc(toDoItemsRef, data);
+                                    params.new && setNewItem(null);
+                                } else {
+                                    params.new
+                                        ? setNewItem(null)
+                                        : removeItemFromLists(index);
+                                }
+                            }}                        
+                        />
+                    );
+                }}
+            />
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({
-  list: {
-    marginVertical: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
+    container: {
+        flex: 1,
+        backgroundColor: "white",
+    },
+    icon: {
+        marginLeft: '45%',
+        fontSize: 32,
+        color: "black",
+        justifyContent:'center', 
+    },
+    button: {
+        backgroundColor: '#FCCA00',
+        padding: 10,
+        borderRadius: 5,
+        marginBottom: 20,
+    },
+    buttonText: {
+        textAlign: 'center',
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
 });
-
-export default TodoList;

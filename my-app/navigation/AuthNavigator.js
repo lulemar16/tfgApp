@@ -10,7 +10,7 @@ const authNav = createMaterialTopTabNavigator();
 
 export default function AuthNavigator() {
   return(
-    <authNav.Navigator>
+    <authNav.Navigator screenOptions={{headerShown: false}}>
       <authNav.Screen name="Login" component={LoginScreen} />
       <authNav.Screen name="Signup" component={SignUpScreen} />
     </authNav.Navigator>

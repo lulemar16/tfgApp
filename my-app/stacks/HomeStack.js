@@ -9,6 +9,7 @@ const HomeStackScreen = () => {
 
   const screenOptions = {
     headerTitleAlign: "center", 
+    headerShown: false,
   };
 
   return (

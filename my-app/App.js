@@ -22,8 +22,6 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      {/* <AuthNavigator/> */}
-      {/* <MainNavigator/> */}
       {user ? <MainNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
