@@ -44,10 +44,10 @@ export default function HomeScreen() {
               <Text style={styles.followersCount}>1000 followers</Text>
             </View>
             
-            <Button style={styles.profileButton} 
+            <TouchableOpacity style={styles.button} 
             onPress={() => navigation.navigate('Profile')}>
-              PROFILE
-            </Button>
+              <Text style={styles.buttonText}>PROFILE</Text>
+            </TouchableOpacity>
         </View>
       ) : (
         <View style={styles.profileSection}>
@@ -61,10 +61,10 @@ export default function HomeScreen() {
             <Text style={styles.followersCount}>1000 followers</Text>
           </View>
           
-          <Button style={styles.profileButton} 
+          <TouchableOpacity style={styles.button} 
           onPress={() => navigation.navigate('Profile')}>
-            PROFILE
-          </Button>
+            <Text style={styles.buttonText}>PROFILE</Text>
+          </TouchableOpacity>
       </View>
       )}
 
@@ -140,10 +140,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#fff',
   },
-  profileButton: {
-    backgroundColor: '#E99D42',
-    padding: 1,
+  button: {
+    backgroundColor: '#FCCA00',
+    padding: 10,
     borderRadius: 5,
+  },
+  buttonText: {
+    textAlign: 'center',
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   videoSection: {
     backgroundColor: '#000',

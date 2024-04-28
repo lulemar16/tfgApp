@@ -26,11 +26,11 @@ export default function ProfileScreen({navigation} ) {
   const handleChangePassword = async () => {
     try {
       // Check if the user is authenticated
-      if (user) {
+      if (auth.currentUser) {
         // Re-authenticate the user before changing the password
         // You need to prompt the user to enter their current password again
         const credentials = EmailAuthProvider.credential(
-          user.email,
+          auth.currentUser.email,
           currentPassword
         );
         
@@ -118,21 +118,26 @@ export default function ProfileScreen({navigation} ) {
         placeholder="Current Password"
         secureTextEntry
         onChangeText={setCurrentPassword}
+        value={currentPassword}
       />
       <TextInput
         style={styles.input}
         placeholder="New Password"
         secureTextEntry
         onChangeText={setNewPassword}
+        value={newPassword}
       />
       <TextInput
         style={styles.input}
         placeholder="Repeat New Password"
         secureTextEntry
         onChangeText={setConfirmPassword}
+        value={confirmPassword}
       />
 
-      <Button style={styles.button} title="Change Password" onPress={handleChangePassword} />
+      <TouchableOpacity style={styles.button} onPress={handleChangePassword}>
+        <Text style={styles.buttonText}>Change password</Text>
+      </TouchableOpacity>
 
       {/* Logout Section */}
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogOut}>
@@ -192,15 +197,24 @@ const styles = StyleSheet.create({
     width: '80%',
   },
   button: {
-    width: '80%',
-    backgroundColor: '#E99D42',
+    backgroundColor: '#FCCA00',
+    padding: 10,
+    borderRadius: 5,
+  },
+  buttonText: {
+    textAlign: 'center',
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   logoutButton: {
-    marginTop: 20,
-    marginBottom: 20
+    margin: 10,
+    backgroundColor: '#E99D42',
+    padding: 10,
+    borderRadius: 5,
   },
   logoutButtonText: {
-    color: '#E99D42', 
+    color: 'white',
   },
 });
 
