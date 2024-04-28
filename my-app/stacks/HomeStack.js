@@ -1,5 +1,4 @@
 import React from "react";
-import { View, Text } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import ProfileScreen from "../screens/ProfileScreen/ProfileScreen";
 import HomeScreen from "../screens/HomeScreen/HomeScreen";
@@ -13,9 +12,9 @@ const HomeStackScreen = () => {
   };
 
   return (
-    <HomeStack.Navigator screenOptions={screenOptions}>
-      <HomeStack.Screen name="Home" component={HomeScreen} />
-      <HomeStack.Screen name="Profile" component={ProfileScreen} />
+    <HomeStack.Navigator>
+      <HomeStack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
+      <HomeStack.Screen name="Profile" component={ProfileScreen} options={{ headerShown: true }} />
     </HomeStack.Navigator>
   );
 };

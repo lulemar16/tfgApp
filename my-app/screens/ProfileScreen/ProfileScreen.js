@@ -2,14 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, Image, TouchableOpacity, Text, StyleSheet, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as ImagePicker from 'expo-image-picker';
-
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, deleteDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from '@firebase/auth';
-import { auth, logOut } from '../../services/AuthService'; 
-import { updatePassword, getAuth } from '@firebase/auth';
+import { logOut } from '../../services/AuthService'; 
+import { updatePassword, getAuth, updateProfile } from '@firebase/auth';
 import { EmailAuthProvider, reauthenticateWithCredential } from '@firebase/auth';
 
 import { Alert } from 'react-native';
 
+const auth = getAuth();
+const db = getFirestore();
+const userUID = auth.currentUser ? auth.currentUser.uid : "";
 
 export default function ProfileScreen({navigation} ) {
 
@@ -19,18 +22,6 @@ export default function ProfileScreen({navigation} ) {
   const [profileImage, setProfileImage] = useState(null);
 
   const [user, setUser] = useState(null);
-  // auth = getAuth();
-
-  // useEffect(() => {
-  //   const unsubscribe = auth.onAuthStateChanged(user => {
-  //     if (user) {
-  //       setUser(user);
-  //     }
-  //   })
-
-  //   // Cleanup the subscription when the component unmounts
-  //   return () => unsubscribe();
-  // }, []);
 
   const handleChangePassword = async () => {
     try {
@@ -87,15 +78,14 @@ export default function ProfileScreen({navigation} ) {
       quality: 1,
     });
 
-    console.log(result);
+    const cleanedUrl = result.assets[0].uri.replace(/^file:\/\//, ''); 
 
-    if (!result.canceled && result.assets.length > 0) {
-      setProfileImage(result.assets[0].uri);
-      if (auth.currentUser){
-        auth.currentUser.photoURL = profileImage;
-      };
-      // console.log('image url:', user.photoURL)
-    }
+    updateProfile(auth.currentUser, { photoURL: `${result.assets[0].uri}` })
+      .then(() => {
+          setProfileImage(result.assets[0].uri);
+          console.log("success: ", result.assets[0].uri);
+    }).catch((error) => { console.log(error); });
+
   };
 
   return (
@@ -106,7 +96,7 @@ export default function ProfileScreen({navigation} ) {
         {/* Profile icon */}
         {/* <Icon name="account-circle" size={150} color="#555" /> */}
         {/* Profile image */}
-        <Image source={{ uri: profileImage }} style={styles.profileImage} /> 
+        <Image source={{ uri: auth.currentUser.photoURL }} style={styles.profileImage} /> 
         <View style={styles.buttonSection}>
           <TouchableOpacity style={styles.changePictureButton} onPress={pickImage}>
             <Text style={styles.changePictureButtonText}>Change photo</Text>

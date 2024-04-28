@@ -7,7 +7,9 @@ import {useNavigation} from "@react-navigation/native";
 import { Button } from '@rneui/base';
 
 import { onAuthStateChanged } from '@firebase/auth';
-import { auth } from '../../services/AuthService'; 
+import { getAuth } from 'firebase/auth';
+
+const auth = getAuth();
 
 export default function HomeScreen() {
 
@@ -16,11 +18,6 @@ export default function HomeScreen() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
-      console.log('USER:', user)
-      if (user) {
-        console.log('EMAIL:', user.email)
-        console.log('url:', user.photoURL)
-      }
     });
 
     // Cleanup the subscription when the component unmounts
@@ -38,7 +35,7 @@ export default function HomeScreen() {
             {/* Profile image */}
             <Image
               style={styles.profileImage}
-              source={{ uri: user.photoURL }} // Replace 'URL_DE_TU_IMAGEN' with the URL of your profile image
+              source={{ uri: auth.currentUser.photoURL }} // Replace 'URL_DE_TU_IMAGEN' with the URL of your profile image
             />
 
             {/* User information */}
@@ -123,19 +120,24 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
+  profileImage: {
+    width: 75,
+    height: 75,
+    borderRadius: 100,
+  },
   userInfo: {
     flexDirection: 'column',
-    padding: 15,
-    paddingLeft: '10%',
-    paddingRight: '10%'
+    padding: 5,
+    paddingLeft: '3%',
+    paddingRight: '5%'
   },
   username: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: 'bold',
     color: '#fff',
   },
   followersCount: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#fff',
   },
   profileButton: {
