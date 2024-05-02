@@ -86,16 +86,29 @@ const ClockScreen = () => {
   };
   
 
-  const toggleAlarm = (index) => {
+  const toggleAlarm = async (index) => {
+    const alarmToUpdate = alarms[index];
+    const alarmDocRef = doc(alarmsRef, alarmToUpdate.id);
+    const newEnabledValue = !alarmToUpdate.enabled;
+  
+    if (alarmToUpdate.enabled) {
+      await updateDoc(alarmDocRef, {
+        enabled: false
+      });
+    }  else {
+      await updateDoc(alarmDocRef, {
+        enabled: true
+      });
+    }
+    // Update the alarms state with the toggled value
     const updatedAlarms = [...alarms];
-    updatedAlarms[index].enabled = !updatedAlarms[index].enabled;
+    updatedAlarms[index].enabled = newEnabledValue;
     setAlarms(updatedAlarms);
   };
+  
 
   const removeAlarm = async (index) => {
     const alarmToRemove = alarms[index];
-    console.log('ref: ', alarmsRef)
-    console.log('remove: ', alarmToRemove)
     const alarmDocRef = doc(alarmsRef, alarmToRemove.id);
     await deleteDoc(alarmDocRef);
     const updatedAlarms = [...alarms];
