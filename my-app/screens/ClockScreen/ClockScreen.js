@@ -66,10 +66,6 @@ const ClockScreen = () => {
   const addAlarm = async (title, time) => {
     setShowAlarmPicker(false);
     const newAlarmTime = dayjs(time).format('HH:mm');
-    setAlarms([
-      ...alarms,
-      { title: title, time: newAlarmTime, type: 'alarm', enabled: true },
-    ]);
     const docRef = await addDoc(alarmsRef, { 
       title: title, 
       time: newAlarmTime, 
@@ -80,6 +76,10 @@ const ClockScreen = () => {
     updateDoc(docRef, {
       id : docRef.id
     })
+    setAlarms([
+      ...alarms,
+      { title: title, time: newAlarmTime, type: 'alarm', enabled: true, id: docRef.id },
+    ]);
     setNewAlarm('');
     setNewAlarmTitle('');
     setSelectedAlarmTime(new Date());
@@ -92,7 +92,12 @@ const ClockScreen = () => {
     setAlarms(updatedAlarms);
   };
 
-  const removeAlarm = (index) => {
+  const removeAlarm = async (index) => {
+    const alarmToRemove = alarms[index];
+    console.log('ref: ', alarmsRef)
+    console.log('remove: ', alarmToRemove)
+    const alarmDocRef = doc(alarmsRef, alarmToRemove.id);
+    await deleteDoc(alarmDocRef);
     const updatedAlarms = [...alarms];
     updatedAlarms.splice(index, 1);
     setAlarms(updatedAlarms);
@@ -104,11 +109,6 @@ const ClockScreen = () => {
       alert('Invalid timer format. Please use hh:mm:ss');
       return;
     }
-
-    setTimers([
-      ...timers,
-      { initialTime: newTimer, time: newTimer, type: 'timer', paused: true },
-    ]);
     const docRef = await addDoc(timersRef, { 
       initialTime: newTimer, 
       time: newTimer, 
@@ -119,6 +119,10 @@ const ClockScreen = () => {
     updateDoc(docRef, {
       id : docRef.id
     })
+    setTimers([
+      ...timers,
+      { initialTime: newTimer, time: newTimer, type: 'timer', paused: true, id: docRef.id },
+    ]);
     setNewTimer('');
   };
 
@@ -153,7 +157,10 @@ const ClockScreen = () => {
     setTimers(updatedTimers);
   };
 
-  const removeTimer = (index) => {
+  const removeTimer = async (index) => {
+    const timerToRemove = timers[index];
+    const timerDocRef = doc(timersRef, timerToRemove.id);
+    await deleteDoc(timerDocRef);
     const updatedTimers = [...timers];
     updatedTimers.splice(index, 1);
     setTimers(updatedTimers);
@@ -162,10 +169,6 @@ const ClockScreen = () => {
   const addDeadline = async (title, time) => {
     setShowDeadlinePicker(false);
     const newDeadlineTime = dayjs(time);
-    setDeadlines([
-      ...deadlines,
-      { title: title, time: newDeadlineTime, type: 'deadline'},
-    ]);
     const docRef = await addDoc(deadlinesRef, { 
       title: title,
       time: time, 
@@ -175,6 +178,10 @@ const ClockScreen = () => {
     updateDoc(docRef, {
       id : docRef.id
     })
+    setDeadlines([
+      ...deadlines,
+      { title: title, time: newDeadlineTime, type: 'deadline', id: docRef.id},
+    ]);
     setShowDeadlinePicker(false);
     setNewDeadline('');
     setNewDeadlineTitle('');
@@ -187,7 +194,10 @@ const ClockScreen = () => {
   //   setDeadlines(updatedDeadlines);
   // };
 
-  const removeDeadline = (index) => {
+  const removeDeadline = async (index) => {
+    const deadlineToRemove = deadlines[index];
+    const deadlineDocRef = doc(deadlinesRef, deadlineToRemove.id);
+    await deleteDoc(deadlineDocRef);
     const updatedDeadlines = [...deadlines];
     updatedDeadlines.splice(index, 1);
     setDeadlines(updatedDeadlines);
