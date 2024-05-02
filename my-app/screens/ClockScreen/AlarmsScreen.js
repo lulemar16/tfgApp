@@ -7,8 +7,8 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native';
-import DateTimePickerModal from './DateTimePickerModal'; // Update the path
-import styles from './styles'; // Update the path
+import DateTimePickerModal from './DateTimePickerModal'; 
+import styles from './styles';
 
 const AlarmsSection = (props) => {
   const {
@@ -49,7 +49,7 @@ const AlarmsSection = (props) => {
             date={selectedAlarmTime}
             onConfirm={(date) => {
               setSelectedAlarmTime(date);
-              addAlarm(); // Ensure you are setting the title here
+              addAlarm(newAlarmTitle, date); // Ensure you are setting the title here
             }}
             onCancel={() => setShowAlarmPicker(false)}
           />
@@ -64,7 +64,7 @@ const AlarmsSection = (props) => {
         renderItem={({ item, index }) => (
           <View style={styles.listItem}>
             <View style={styles.listItem2}>
-              <Text>{`${item.title}`}</Text>
+              <Text style={styles.boldText}>{`${item.title}`}</Text>
               <Text>{`${item.time}`}</Text>
             </View>
             <Switch

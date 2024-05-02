@@ -3,11 +3,18 @@ import { View, ScrollView } from 'react-native';
 import AlarmsSection from './AlarmsScreen';
 import TimersSection from './TimersScreen';
 import DeadlinesSection from './DeadlinesScreen';
-import CustomDateTimePickerModal from './DateTimePickerModal'; // Update the path
-import styles from './styles'; // Update the path
+import CustomDateTimePickerModal from './DateTimePickerModal'; 
+import styles from './styles'; 
 import dayjs from 'dayjs';
 // import { ScrollView, GestureHandlerRootView  } from 'react-native-gesture-handler';
 // import { ScrollView } from 'react-native-virtualized-view'
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, deleteDoc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import {useNavigation} from "@react-navigation/native";
+
+const auth = getAuth();
+const db = getFirestore();
+const userUID = auth.currentUser ? auth.currentUser.uid : "";
 
 const ClockScreen = () => {
   const [alarms, setAlarms] = useState([]);
@@ -17,6 +24,7 @@ const ClockScreen = () => {
   const [newAlarmTitle, setNewAlarmTitle] = useState('');
   const [newTimer, setNewTimer] = useState('');
   const [newDeadline, setNewDeadline] = useState('');
+  const [newDeadlineTitle, setNewDeadlineTitle] = useState('');
   const [showAlarmPicker, setShowAlarmPicker] = useState(false);
   const [showTimerPicker, setShowTimerPicker] = useState(false);
   const [showDeadlinePicker, setShowDeadlinePicker] = useState(false);
@@ -24,20 +32,57 @@ const ClockScreen = () => {
   const [selectedTimerTime, setSelectedTimerTime] = useState(new Date());
   const [selectedDeadlineTime, setSelectedDeadlineTime] = useState(new Date());
 
-  useEffect(() => {
-    const timerInterval = setInterval(updateTimers, 1000);
-    return () => clearInterval(timerInterval);
-  }, [timers]);
+  // const userRef = doc(db, 'users', userUID);
+  // const alarmsRef = collection(userRef, 'alarms');
+  const alarmsRef = collection(db, 'users', userUID, 'alarms');
 
-  const addAlarm = () => {
-    const newAlarmTime = dayjs(selectedAlarmTime).format('HH:mm');
+  // const timersRef = collection(userRef, 'timers');
+  const timersRef = collection(db, 'users', userUID, 'timers');
+
+  // const deadlinesRef = collection(userRef, 'deadlines');
+  const deadlinesRef = collection(db, 'users', userUID, 'deadlines');
+
+  // useEffect(() => {
+  //   const timerInterval = setInterval(updateTimers, 1000);
+  //   return () => clearInterval(timerInterval);
+  // }, [timers]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const alarmsSnapshot = await getDocs(alarmsRef);
+      const alarmsData = alarmsSnapshot.docs.map(doc => doc.data());
+      const timersSnapshot = await getDocs(timersRef);
+      const timersData = timersSnapshot.docs.map(doc => doc.data());
+      const deadlinesSnapshot = await getDocs(deadlinesRef);
+      const deadlinesData = deadlinesSnapshot.docs.map(doc => doc.data());
+      setAlarms(alarmsData);
+      setTimers(timersData);
+      setDeadlines(deadlinesData);
+    };
+
+    fetchData();
+  }, []);
+
+  const addAlarm = async (title, time) => {
+    setShowAlarmPicker(false);
+    const newAlarmTime = dayjs(time).format('HH:mm');
     setAlarms([
       ...alarms,
-      { title: newAlarmTitle, time: newAlarmTime, type: 'alarm', enabled: true },
+      { title: title, time: newAlarmTime, type: 'alarm', enabled: true },
     ]);
-    setShowAlarmPicker(false);
+    const docRef = await addDoc(alarmsRef, { 
+      title: title, 
+      time: newAlarmTime, 
+      type: 'alarm', 
+      enabled: true 
+    });
+    console.log("Document written with ID: ", docRef.id);
+    updateDoc(docRef, {
+      id : docRef.id
+    })
     setNewAlarm('');
     setNewAlarmTitle('');
+    setSelectedAlarmTime(new Date());
   };
   
 
@@ -53,7 +98,7 @@ const ClockScreen = () => {
     setAlarms(updatedAlarms);
   };
 
-  const addTimer = () => {
+  const addTimer = async () => {
     const timerRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
     if (!timerRegex.test(newTimer)) {
       alert('Invalid timer format. Please use hh:mm:ss');
@@ -64,7 +109,16 @@ const ClockScreen = () => {
       ...timers,
       { initialTime: newTimer, time: newTimer, type: 'timer', paused: true },
     ]);
-    setShowTimerPicker(false);
+    const docRef = await addDoc(timersRef, { 
+      initialTime: newTimer, 
+      time: newTimer, 
+      type: 'timer', 
+      paused: true 
+    });
+    console.log("Document written with ID: ", docRef.id);
+    updateDoc(docRef, {
+      id : docRef.id
+    })
     setNewTimer('');
   };
 
@@ -105,21 +159,33 @@ const ClockScreen = () => {
     setTimers(updatedTimers);
   };
 
-  const addDeadline = () => {
-    const newDeadlineTime = dayjs(selectedDeadlineTime).format('HH:mm');
+  const addDeadline = async (title, time) => {
+    setShowDeadlinePicker(false);
+    const newDeadlineTime = dayjs(time);
     setDeadlines([
       ...deadlines,
-      { time: newDeadlineTime, type: 'deadline', enabled: true },
+      { title: title, time: newDeadlineTime, type: 'deadline'},
     ]);
+    const docRef = await addDoc(deadlinesRef, { 
+      title: title,
+      time: time, 
+      type: 'deadline'
+    });
+    console.log("Document written with ID: ", docRef.id);
+    updateDoc(docRef, {
+      id : docRef.id
+    })
     setShowDeadlinePicker(false);
     setNewDeadline('');
+    setNewDeadlineTitle('');
+    setSelectedDeadlineTime(new Date());
   };
 
-  const toggleDeadline = (index) => {
-    const updatedDeadlines = [...deadlines];
-    updatedDeadlines[index].enabled = !updatedDeadlines[index].enabled;
-    setDeadlines(updatedDeadlines);
-  };
+  // const toggleDeadline = (index) => {
+  //   const updatedDeadlines = [...deadlines];
+  //   updatedDeadlines[index].enabled = !updatedDeadlines[index].enabled;
+  //   setDeadlines(updatedDeadlines);
+  // };
 
   const removeDeadline = (index) => {
     const updatedDeadlines = [...deadlines];
@@ -128,7 +194,7 @@ const ClockScreen = () => {
   };
 
   return (
-      <View style={styles.container}>
+      <ScrollView style={styles.container}>
         <AlarmsSection
           alarms={alarms}
           newAlarm={newAlarm}
@@ -153,14 +219,16 @@ const ClockScreen = () => {
         <DeadlinesSection
           deadlines={deadlines}
           newDeadline={newDeadline}
+          newDeadlineTitle={newDeadlineTitle} 
+          setNewDeadlineTitle={setNewDeadlineTitle}
           showDeadlinePicker={showDeadlinePicker}
           selectedDeadlineTime={selectedDeadlineTime}
           addDeadline={addDeadline}
           removeDeadline={removeDeadline}
-          toggleDeadline={(index) => toggleDeadline(index)}
+          // toggleDeadline={(index) => toggleDeadline(index)}
           setShowDeadlinePicker={setShowDeadlinePicker}
         />
-      </View>
+      </ScrollView>
   );
 };
 

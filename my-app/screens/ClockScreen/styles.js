@@ -56,7 +56,7 @@ const styles = {
       marginVertical: 5,
     },
     timerButton: {
-      backgroundColor: '#FCCA00',
+      backgroundColor: '#4CAF50',
       padding: 10,
       borderRadius: 5,
       alignItems: 'center',
@@ -66,6 +66,9 @@ const styles = {
       fontSize: 16,
       fontWeight: 'bold',
     },
+    boldText: {
+      fontWeight: 'bold'
+    }
   };
   
   export default styles;

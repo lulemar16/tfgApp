@@ -7,14 +7,16 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native';
-import DateTimePickerModal from './DateTimePickerModal'; // Update the path
-import styles from './styles'; // Update the path
+import DateTimePickerModal from './DateTimePickerModal'; 
+import styles from './styles'; 
 import dayjs from 'dayjs';
 
 const DeadlinesSection = (props) => {
     const {
       deadlines,
       newDeadline,
+      newDeadlineTitle,
+      setNewDeadlineTitle,
       showDeadlinePicker,
       selectedDeadlineTime,
       addDeadline,
@@ -31,6 +33,12 @@ const DeadlinesSection = (props) => {
       <View style={styles.section}>
         <Text style={styles.sectionHeading}>Deadlines</Text>
         <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Name"
+          value={newDeadlineTitle}
+          onChangeText={(text) => setNewDeadlineTitle(text)}
+        />
           <TextInput
             style={styles.input}
             placeholder="Set new deadline"
@@ -45,26 +53,24 @@ const DeadlinesSection = (props) => {
               date={selectedDeadlineTime}
               onConfirm={(date) => {
                 setShowDeadlinePicker(false);
-                addDeadline(date);
+                addDeadline(newDeadlineTitle, date);
               }}
               onCancel={() => setShowDeadlinePicker(false)}
             />
           )}
         </View>
-        <TouchableOpacity style={styles.addButton} onPress={() => addDeadline(selectedDeadlineTime)}>
+        <TouchableOpacity style={styles.addButton} onPress={() => addDeadline(newDeadlineTitle, selectedDeadlineTime)}>
           <Text style={styles.addButtonText}>Add Deadline</Text>
         </TouchableOpacity>
         <FlatList
           data={deadlines}
           keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item, index }) => (
+          renderItem={({ item, index }) => ( 
             <View style={styles.listItem}>
+              <View style={styles.listItem2}>
+                <Text style={styles.boldText}>{`${item.title}`}</Text>
+              </View>
               <Text>{formatDeadline(item.time)}</Text>
-              <Switch
-                value={item.enabled}
-                onValueChange={() => toggleDeadline(index)}
-                thumbColor={item.enabled ? '#4CAF50' : '#ccc'}
-              />
               <TouchableOpacity onPress={() => removeDeadline(index)}>
                 <Text style={{ color: 'red', marginLeft: 10 }}>Remove</Text>
               </TouchableOpacity>
