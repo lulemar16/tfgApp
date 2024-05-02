@@ -73,7 +73,7 @@ const AlarmsSection = (props) => {
               thumbColor={item.enabled ? '#4CAF50' : '#ccc'}
             />
             <TouchableOpacity onPress={() => removeAlarm(index)}>
-              <Text style={{ color: 'red', marginLeft: 10 }}>Remove</Text>
+              <Text style={{ color: 'red', marginLeft: 10 }}>X</Text>
             </TouchableOpacity>
           </View>
         )}

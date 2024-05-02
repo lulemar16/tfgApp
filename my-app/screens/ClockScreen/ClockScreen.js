@@ -11,6 +11,7 @@ import dayjs from 'dayjs';
 import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, deleteDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import {useNavigation} from "@react-navigation/native";
+import PushNotification from 'react-native-push-notification';
 
 const auth = getAuth();
 const db = getFirestore();
@@ -32,15 +33,15 @@ const ClockScreen = () => {
   const [selectedTimerTime, setSelectedTimerTime] = useState(new Date());
   const [selectedDeadlineTime, setSelectedDeadlineTime] = useState(new Date());
 
-  // const userRef = doc(db, 'users', userUID);
-  // const alarmsRef = collection(userRef, 'alarms');
-  const alarmsRef = collection(db, 'users', userUID, 'alarms');
+  const userRef = doc(db, 'users', userUID);
+  const alarmsRef = collection(userRef, 'alarms');
+  // const alarmsRef = collection(db, 'users', userUID, 'alarms');
 
-  // const timersRef = collection(userRef, 'timers');
-  const timersRef = collection(db, 'users', userUID, 'timers');
+  const timersRef = collection(userRef, 'timers');
+  // const timersRef = collection(db, 'users', userUID, 'timers');
 
-  // const deadlinesRef = collection(userRef, 'deadlines');
-  const deadlinesRef = collection(db, 'users', userUID, 'deadlines');
+  const deadlinesRef = collection(userRef, 'deadlines');
+  // const deadlinesRef = collection(db, 'users', userUID, 'deadlines');
 
   // useEffect(() => {
   //   const timerInterval = setInterval(updateTimers, 1000);
@@ -59,9 +60,14 @@ const ClockScreen = () => {
       setTimers(timersData);
       setDeadlines(deadlinesData);
     };
-
+    PushNotification.configure();
+    PushNotification.requestPermissions();
     fetchData();
-  }, []);
+
+    const timerInterval = setInterval(updateTimers, 1000);
+    return () => clearInterval(timerInterval);
+  }, [timers]);
+
 
   const addAlarm = async (title, time) => {
     setShowAlarmPicker(false);
@@ -105,7 +111,6 @@ const ClockScreen = () => {
     updatedAlarms[index].enabled = newEnabledValue;
     setAlarms(updatedAlarms);
   };
-  
 
   const removeAlarm = async (index) => {
     const alarmToRemove = alarms[index];
@@ -117,6 +122,7 @@ const ClockScreen = () => {
   };
 
   const addTimer = async () => {
+    clearInterval(timerInterval);
     const timerRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
     if (!timerRegex.test(newTimer)) {
       alert('Invalid timer format. Please use hh:mm:ss');
@@ -137,38 +143,56 @@ const ClockScreen = () => {
       { initialTime: newTimer, time: newTimer, type: 'timer', paused: true, id: docRef.id },
     ]);
     setNewTimer('');
+    const newTimerInterval = setInterval(updateTimers, 1000);
+    setTimerInterval(newTimerInterval);
   };
 
-  const updateTimers = () => {
-    const updatedTimers = timers.map((timer, index) => {
+  const updateTimers = async () => {
+    console.log("Updating timers...");
+    const updatedTimers = timers.map(async (timer, index) => {
+      console.log(`Timer ${index + 1}: ${timer.time}`);
       if (!timer.paused) {
         const [hours, minutes, seconds] = timer.time.split(':').map(Number);
         let totalSeconds = hours * 3600 + minutes * 60 + seconds;
         totalSeconds = Math.max(0, totalSeconds - 1);
-
+  
         if (totalSeconds === 0) {
           const initialTime = timer.initialTime;
-          toggleTimer(index);
+          await toggleTimer(index);
+          console.log(`Timer ${index + 1} reached 0 seconds. Resetting to initial time: ${initialTime}`);
           return { ...timer, time: initialTime };
         }
-
+  
         const newTime = dayjs()
           .startOf('day')
           .add(totalSeconds, 'seconds')
           .format('HH:mm:ss');
+        console.log(`Timer ${index + 1} updated to: ${newTime}`);
         return { ...timer, time: newTime };
       }
       return timer;
     });
-
-    setTimers(updatedTimers);
-  };
-
-  const toggleTimer = (index) => {
+  
+    const updatedTimersData = await Promise.all(updatedTimers);
+    console.log("Updated timers:", updatedTimersData);
+    setTimers(updatedTimersData);
+  };  
+  
+  
+  const toggleTimer = async (index) => {
+    const timerToUpdate = timers[index];
+    const timerDocRef = doc(timersRef, timerToUpdate.id);
+    const newPausedValue = !timerToUpdate.paused;
+  
+    await updateDoc(timerDocRef, {
+      paused: newPausedValue
+    });
+  
     const updatedTimers = [...timers];
-    updatedTimers[index].paused = !updatedTimers[index].paused;
+    updatedTimers[index].paused = newPausedValue;
     setTimers(updatedTimers);
   };
+  
 
   const removeTimer = async (index) => {
     const timerToRemove = timers[index];

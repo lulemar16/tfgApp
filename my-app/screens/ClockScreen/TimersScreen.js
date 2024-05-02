@@ -41,7 +41,7 @@ const TimersSection = (props) => {
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => removeTimer(index)}>
-                <Text style={{ color: 'red', marginLeft: 10 }}>Remove</Text>
+                <Text style={{ color: 'red', marginLeft: 10 }}>X</Text>
               </TouchableOpacity>
             </View>
           )}

@@ -72,7 +72,7 @@ const DeadlinesSection = (props) => {
               </View>
               <Text>{formatDeadline(item.time)}</Text>
               <TouchableOpacity onPress={() => removeDeadline(index)}>
-                <Text style={{ color: 'red', marginLeft: 10 }}>Remove</Text>
+                <Text style={{ color: 'red', marginLeft: 10 }}>X</Text>
               </TouchableOpacity>
             </View>
           )}
