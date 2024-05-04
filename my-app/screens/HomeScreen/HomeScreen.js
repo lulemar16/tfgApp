@@ -9,12 +9,13 @@ import { Button } from '@rneui/base';
 import { onAuthStateChanged } from '@firebase/auth';
 import { getAuth } from 'firebase/auth';
 
+
 const auth = getAuth();
 
 export default function HomeScreen() {
 
   const [user, setUser] = useState(null);
-
+  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
@@ -53,7 +54,7 @@ export default function HomeScreen() {
         <View style={styles.profileSection}>
 
           {/* Profile icon */}
-          {/* <Icon name="account-circle" size={70} color="#555" /> */}
+          <Icon name="account-circle" size={70} color="#555" />
 
           {/* User information */}          
           <View style={styles.userInfo}>

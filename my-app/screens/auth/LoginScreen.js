@@ -1,10 +1,11 @@
 // screens/LoginScreen.js
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TextInput, TouchableOpacity, Image } from 'react-native';
 import { getAuth } from 'firebase/auth';
 import { logIn } from '../../services/AuthService';
 import {useNavigation} from "@react-navigation/core";
 import { Button, Text } from '@rneui/base';
+import logo from '../../assets/logoFF.png';
 
 const LoginScreen = (props) => {
 
@@ -36,6 +37,8 @@ const LoginScreen = (props) => {
 
   return (
     <View style={styles.containerFather}>
+      {/* Logo */}
+      <Image source={logo} style={styles.logo} />
       <Text style={styles.subtitle}>LOGIN</Text>
       <TextInput style={styles.inputText} placeholder="Email" onChangeText={setEmail} />
       <TextInput style={styles.inputText} placeholder="Password" secureTextEntry onChangeText={setPassword} />
@@ -106,5 +109,10 @@ const styles = StyleSheet.create({
     padding: 10,
     color: 'white',
     fontSize: 16
+  },
+  logo: {
+    width: 150, // Adjust the width and height according to your logo size
+    height: 150,
+    marginBottom: 20 // Add margin bottom to create space between logo and other elements
   }
 })

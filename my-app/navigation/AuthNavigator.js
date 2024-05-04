@@ -6,7 +6,7 @@ import SignUpScreen from  '../screens/auth/SignUpScreen';
 import HomeScreen from '../screens/HomeScreen/HomeScreen';
 import MainNavigator from './MainNavigator';
 
-const authNav = createMaterialTopTabNavigator();
+const authNav = createStackNavigator();
 
 export default function AuthNavigator() {
   return(
