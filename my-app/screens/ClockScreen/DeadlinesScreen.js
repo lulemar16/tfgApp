@@ -24,9 +24,14 @@ const DeadlinesSection = (props) => {
       setShowDeadlinePicker,
       removeDeadline,
     } = props;
-  
+    
+
     const formatDeadline = (date) => {
-      return dayjs(date).format('DD.MM.YYYY [at] HH:mm');
+      // Convert the custom date object into a JavaScript Date object
+      const jsDate = new Date(date.seconds * 1000); // Convert seconds to milliseconds
+      // Parse the JavaScript Date object using dayjs
+      const parsedDate = dayjs(jsDate);
+      return parsedDate.format('DD.MM.YYYY [at] HH:mm');
     };
   
     return (
