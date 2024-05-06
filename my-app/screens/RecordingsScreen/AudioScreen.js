@@ -1,29 +1,64 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, StyleSheet, View, FlatList, TouchableOpacity, Alert, TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, addDoc, updateDoc, getDocs, doc } from 'firebase/firestore';
 
-export default class AudioScreen extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isRecording: false,
-      isPaused: false,
-      recordingStartTime: null,
-      recordings: [],
-      elapsedTime: 0,
-      isPlaying: false,
-      playingRecordingIndex: null,
-      recordingTitle: '',
+const auth = getAuth();
+const db = getFirestore();
+const userUID = auth.currentUser ? auth.currentUser.uid : "anonymous";
+
+export default function AudioScreen() {
+
+  // const userRef = doc(db, 'users', userUID);
+  const recordsRef = collection(doc(db, 'users', userUID), 'recordings');
+  // const recordsRef = collection(db, 'users', userUID, 'recordings');
+
+  const [isRecording, setIsRecording] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [recordingStartTime, setRecordingStartTime] = useState(null);
+  const [recordings, setRecordings] = useState([]);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playingRecordingIndex, setPlayingRecordingIndex] = useState(null);
+  const [recordingTitle, setRecordingTitle] = useState('');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const recordsSnapshot = await getDocs(recordsRef);
+      const recordsData = recordsSnapshot.docs.map(doc => doc.data());
+      setRecordings(recordsData);
+      console.log('records: ', recordings);
     };
-    this.timerInterval = null;
-  }
+    fetchData();
+  }, []);
 
-  toggleRecording = () => {
-    if (this.state.isRecording) {
+  const saveRecordingToFirestore = async (recording) => {
+    try {
+      const docRef = await addDoc(recordsRef, recording);
+      console.log('Recording added with ID: ', docRef.id);
+      updateDoc(docRef, {
+        id: docRef.id,
+      })
+    } catch (error) {
+      console.error('Error adding recording: ', error);
+    }
+  };
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      // Code to save recording
       const recordingEndTime = new Date();
       const recordingDuration =
-        recordingEndTime - (this.state.recordingStartTime || recordingEndTime);
+        recordingEndTime - (recordingStartTime || recordingEndTime);
+      const recording = {
+        title: recordingTitle,
+        duration: recordingDuration,
+        // Add other recording information as needed
+      };
+      saveRecordingToFirestore(recording);
 
+      // Alert and reset state
       Alert.alert(
         'Save recording',
         'Do you want to save the recording?',
@@ -32,31 +67,25 @@ export default class AudioScreen extends Component {
             text: 'Cancel',
             style: 'cancel',
             onPress: () => {
-              this.setState({
-                isRecording: false,
-                isPaused: false,
-                elapsedTime: 0,
-                recordingTitle: '', // Clear recording title
-              });
+              setIsRecording(false);
+              setIsPaused(false);
+              setElapsedTime(0);
+              setRecordingTitle('');
               clearInterval(this.timerInterval);
             },
           },
           {
             text: 'Save',
             onPress: () => {
-              this.setState((prevState) => ({
-                isRecording: false,
-                isPaused: false,
-                recordings: [
-                  { title: this.state.recordingTitle, duration: recordingDuration, /* Other recording information */ },
-                  ...prevState.recordings,
-                ],
-                elapsedTime: 0,
-                recordingTitle: '', // Clear recording title
-              }));
-
+              setRecordings([
+                { title: recordingTitle, duration: recordingDuration },
+                ...recordings,
+              ]);
+              setIsRecording(false);
+              setIsPaused(false);
+              setElapsedTime(0);
+              setRecordingTitle('');
               clearInterval(this.timerInterval);
-
               // Scroll up to show the new recording at the top
               this.flatListRef.scrollToOffset({ offset: 0, animated: true });
             },
@@ -65,113 +94,95 @@ export default class AudioScreen extends Component {
         { cancelable: false }
       );
     } else {
-      this.setState(
-        (prevState) => ({
-          isRecording: true,
-          recordingStartTime: !this.state.isPaused ? new Date() : this.state.recordingStartTime,
-          isPaused: false,
-        }),
-        () => {
-          this.timerInterval = setInterval(() => {
-            this.setState((prevState) => ({ elapsedTime: prevState.elapsedTime + 1 }));
-          }, 1000);
-        }
-      );
+      // Code to start recording
+      setIsRecording(true);
+      setRecordingStartTime(!isPaused ? new Date() : recordingStartTime);
+      setIsPaused(false);
+      this.timerInterval = setInterval(() => {
+        setElapsedTime(prevElapsedTime => prevElapsedTime + 1);
+      }, 1000);
     }
   };
 
-  togglePause = () => {
-    this.setState((prevState) => ({
-      isPaused: !prevState.isPaused,
-    }));
+  const togglePause = () => {
+    setIsPaused(prevIsPaused => !prevIsPaused);
   };
 
-  togglePlay = (index) => {
-    if (this.state.isPlaying && index === this.state.playingRecordingIndex) {
-      // Pause playback
-      // Logic to pause playback
-      this.setState({ isPlaying: false });
+  const togglePlay = (index) => {
+    if (isPlaying && index === playingRecordingIndex) {
+      setIsPlaying(false);
     } else {
-      // Start playback
-      // Logic to start playback of the recording at the specified index
-      this.setState({ isPlaying: true, playingRecordingIndex: index });
+      setIsPlaying(true);
+      setPlayingRecordingIndex(index);
     }
   };
 
-  isPlaying = (index) => this.state.isPlaying && index === this.state.playingRecordingIndex;
+  const isCurrentlyPlaying = (index) => isPlaying && index === playingRecordingIndex;
 
-  // Helper function to format time components to have leading zeros
-  formatTimeComponent = (value) => (value < 10 ? `0${value}` : value);
+  const formatTimeComponent = (value) => (value < 10 ? `0${value}` : value);
 
-  render() {
-    const { isRecording, isPaused, elapsedTime, recordingTitle } = this.state;
+  return (
+    <View style={styles.container}>
+      <FlatList
+        ref={(ref) => (this.flatListRef = ref)}
+        data={recordings}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item, index }) => {
+          const durationInSeconds = item.duration / 1000;
+          const hours = Math.floor(durationInSeconds / 3600);
+          const minutes = Math.floor((durationInSeconds % 3600) / 60);
+          const seconds = Math.floor(durationInSeconds % 60);
 
-    return (
-      <View style={styles.container}>
-        <FlatList
-          ref={(ref) => (this.flatListRef = ref)}
-          data={this.state.recordings}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item, index }) => {
-            const durationInSeconds = item.duration / 1000;
-            const hours = Math.floor(durationInSeconds / 3600);
-            const minutes = Math.floor((durationInSeconds % 3600) / 60);
-            const seconds = Math.floor(durationInSeconds % 60);
-
-            return (
-              <View style={styles.recordingItem}>
-                <View style={styles.playbackContainer}>
-                  <Text style={styles.titleText}>{item.title}</Text>
-                  <TouchableOpacity onPress={() => this.togglePlay(index)}>
-                    <Icon
-                      name={this.isPlaying(index) ? 'pause' : 'play-arrow'}
-                      size={20}
-                      color="white"
-                    />
-                  </TouchableOpacity>
-                  <View>
-                    <Text style={styles.playbackText}>
-                      {`${this.formatTimeComponent(hours)}:${this.formatTimeComponent(
-                        minutes
-                      )}:${this.formatTimeComponent(seconds)}`}
-                    </Text>
-                  </View>
+          return (
+            <View style={styles.recordingItem}>
+              <View style={styles.playbackContainer}>
+                <Text style={styles.titleText}>{item.title}</Text>
+                <TouchableOpacity onPress={() => togglePlay(index)}>
+                  <Icon
+                    name={isCurrentlyPlaying(index) ? 'pause' : 'play-arrow'}
+                    size={20}
+                    color="white"
+                  />
+                </TouchableOpacity>
+                <View>
+                  <Text style={styles.playbackText}>
+                    {`${formatTimeComponent(hours)}:${formatTimeComponent(
+                      minutes
+                    )}:${formatTimeComponent(seconds)}`}
+                  </Text>
                 </View>
-                {/* Add more details of the recording as needed */}
               </View>
-            );
-          }}
-        />
-        <View style={styles.record}>
-          <TouchableOpacity style={styles.recordButton} onPress={this.toggleRecording}>
-            <Icon name={isRecording ? 'stop' : 'mic'} size={30} color="white" />
-          </TouchableOpacity>
-
-          {isRecording && (
-            <View style={styles.recordingInfo}>
-              <TouchableOpacity style={styles.pauseButton} onPress={this.togglePause}>
-                <Icon name={isPaused ? 'play-arrow' : 'pause'} size={20} color="white" />
-              </TouchableOpacity>
-              <Text style={styles.recordingTime}>{elapsedTime}s</Text>
-              <TextInput
-                style={styles.titleInput}
-                placeholder="Recording Title"
-                onChangeText={(text) => this.setState({ recordingTitle: text })}
-                value={recordingTitle}
-              />
             </View>
-          )}
-        </View>
+          );
+        }}
+      />
+      <View style={styles.record}>
+        <TouchableOpacity style={styles.recordButton} onPress={toggleRecording}>
+          <Icon name={isRecording ? 'stop' : 'mic'} size={30} color="white" />
+        </TouchableOpacity>
+
+        {isRecording && (
+          <View style={styles.recordingInfo}>
+            <TouchableOpacity style={styles.pauseButton} onPress={togglePause}>
+              <Icon name={isPaused ? 'play-arrow' : 'pause'} size={20} color="white" />
+            </TouchableOpacity>
+            <Text style={styles.recordingTime}>{elapsedTime}s</Text>
+            <TextInput
+              style={styles.titleInput}
+              placeholder="Recording Title"
+              onChangeText={(text) => setRecordingTitle(text)}
+              value={recordingTitle}
+            />
+          </View>
+        )}
       </View>
-    );
-  }
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    // alignItems: 'center',
   },
   recordingItem: {
     padding: 10,
@@ -200,15 +211,17 @@ const styles = StyleSheet.create({
   },
   playbackText: {
     color: 'black',
-    marginLeft: 10,
+    margin: 10,
   },
   titleText: {
     color: 'black',
     fontSize: 14,
     marginTop: 5,
+    marginRight:'60%'
   },
   titleInput: {
     height: 40,
+    width: '200%',
     borderColor: 'gray',
     borderWidth: 1,
     marginTop: 5,
@@ -229,7 +242,7 @@ const styles = StyleSheet.create({
     bottom: 20,
   },
   recordingInfo: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
     position: 'absolute',
     bottom: 90,
