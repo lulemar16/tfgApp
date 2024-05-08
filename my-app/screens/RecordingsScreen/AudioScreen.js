@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Text, StyleSheet, View, FlatList, TouchableOpacity, Alert, TextInput } from 'react-native';
+import { Text, StyleSheet, View, TouchableOpacity, Alert, TextInput, Button } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, collection, addDoc, updateDoc, getDocs, doc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, updateDoc, getDocs, doc, deleteDocs, deleteDoc } from 'firebase/firestore';
+import { Audio } from 'expo-av';
 
 const auth = getAuth();
 const db = getFirestore();
 const userUID = auth.currentUser ? auth.currentUser.uid : "anonymous";
+
 
 export default function AudioScreen() {
 
@@ -15,13 +17,9 @@ export default function AudioScreen() {
   // const recordsRef = collection(db, 'users', userUID, 'recordings');
 
   const [isRecording, setIsRecording] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const [recordingStartTime, setRecordingStartTime] = useState(null);
   const [recordings, setRecordings] = useState([]);
-  const [elapsedTime, setElapsedTime] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [playingRecordingIndex, setPlayingRecordingIndex] = useState(null);
   const [recordingTitle, setRecordingTitle] = useState('');
+  const [recording, setRecording ] = useState();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,147 +31,143 @@ export default function AudioScreen() {
     fetchData();
   }, []);
 
-  const saveRecordingToFirestore = async (recording) => {
+  const startRecording = async () => {
     try {
-      const docRef = await addDoc(recordsRef, recording);
+      const perm = await Audio.requestPermissionsAsync();
+      if (perm.status === "granted") {
+        setIsRecording(true);
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: true,
+          playsInSilentModeIOS: true
+        });
+        const { recording } = await Audio.Recording.createAsync(Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY);
+        setRecording(recording);
+      }
+    } catch (err) {}
+  };
+  
+  const stopRecording = async () => {
+    setRecording(undefined);
+    setIsRecording(false);
+
+    await recording.stopAndUnloadAsync();
+    let allRecordings = [...recordings];
+    
+    try {
+      const { status } = await recording.createNewLoadedSoundAsync();
+      if (status) {
+        const newRecording = {
+          title: recordingTitle,
+          uri: recording.getURI(),
+          duration: getDurationFormatted(status.durationMillis),
+          file: recording.getURI()
+        };
+        allRecordings.push(newRecording);
+        saveRecordingToFirestore(newRecording);
+      } else {
+        console.error('Failed to get status when creating sound.');
+      }
+    } catch (error) {
+      console.error('Error creating loaded sound: ', error);
+    }
+    setRecordings(allRecordings);
+  }
+  
+
+  const getDurationFormatted = (milliseconds) => {
+    const minutes = milliseconds / 1000 / 60;
+    const seconds = Math.round((minutes - Math.floor(minutes)) * 60);
+    return seconds < 10 ? `${Math.floor(minutes)}:0${seconds}` : `${Math.floor(minutes)}:${seconds}`
+  };
+
+  const getRecordingLines = () => {
+    return recordings.map((recordingLine, index) => {
+      return (
+        <View key={index} style={styles.playbackContainer}>
+          <TouchableOpacity onPress={() => confirmDeleteRecording(recordingLine)}>
+            <Icon name="delete" size={24} color="red" />
+          </TouchableOpacity>
+          <Text style={styles.fill}>
+           {recordingLine.title} | {recordingLine.duration}
+          </Text>
+          <View style={styles.playback}>
+            <TouchableOpacity style={styles.playbackButton} onPress={() => playRecording(recordingLine.uri)}>
+              <Text style={styles.buttonText}>{recordings.length > 0 ? '▶' : ''}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      );
+    });
+  };
+
+  const playRecording = async (uri) => {
+    const soundObject = new Audio.Sound();
+
+    try {
+      await soundObject.loadAsync({ uri: uri });
+      await soundObject.playAsync();
+    } catch (error) {
+      console.error('Error playing recording: ', error);
+    }
+  }
+
+  const clearRecordings = () => {
+    setRecordings([]);
+    deleteDocs(recordsRef); 
+  }
+
+  const saveRecordingToFirestore = async (newRecording) => {
+    try {
+      const docRef = await addDoc(recordsRef, newRecording);
       console.log('Recording added with ID: ', docRef.id);
       updateDoc(docRef, {
         id: docRef.id,
       })
+      setRecordingTitle(null);
     } catch (error) {
       console.error('Error adding recording: ', error);
     }
   };
 
-  const toggleRecording = () => {
-    if (isRecording) {
-      // Code to save recording
-      const recordingEndTime = new Date();
-      const recordingDuration =
-        recordingEndTime - (recordingStartTime || recordingEndTime);
-      const recording = {
-        title: recordingTitle,
-        duration: recordingDuration,
-        // Add other recording information as needed
-      };
-      saveRecordingToFirestore(recording);
+  const confirmDeleteRecording = (recording) => {
+    Alert.alert(
+      'Confirm Deletion',
+      'Are you sure you want to delete this recording?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', onPress: () => deleteRecording(recording) },
+      ]
+    );
+  };
 
-      // Alert and reset state
-      Alert.alert(
-        'Save recording',
-        'Do you want to save the recording?',
-        [
-          {
-            text: 'Cancel',
-            style: 'cancel',
-            onPress: () => {
-              setIsRecording(false);
-              setIsPaused(false);
-              setElapsedTime(0);
-              setRecordingTitle('');
-              clearInterval(this.timerInterval);
-            },
-          },
-          {
-            text: 'Save',
-            onPress: () => {
-              setRecordings([
-                { title: recordingTitle, duration: recordingDuration },
-                ...recordings,
-              ]);
-              setIsRecording(false);
-              setIsPaused(false);
-              setElapsedTime(0);
-              setRecordingTitle('');
-              clearInterval(this.timerInterval);
-              // Scroll up to show the new recording at the top
-              this.flatListRef.scrollToOffset({ offset: 0, animated: true });
-            },
-          },
-        ],
-        { cancelable: false }
-      );
-    } else {
-      // Code to start recording
-      setIsRecording(true);
-      setRecordingStartTime(!isPaused ? new Date() : recordingStartTime);
-      setIsPaused(false);
-      this.timerInterval = setInterval(() => {
-        setElapsedTime(prevElapsedTime => prevElapsedTime + 1);
-      }, 1000);
+  const deleteRecording = async (recording) => {
+    try {
+      await deleteDoc(doc(recordsRef, recording.id));
+      const updatedRecordings = recordings.filter(rec => rec.id !== recording.id);
+      setRecordings(updatedRecordings);
+      console.log('Recording deleted successfully.');
+    } catch (error) {
+      console.error('Error deleting recording: ', error);
     }
   };
-
-  const togglePause = () => {
-    setIsPaused(prevIsPaused => !prevIsPaused);
-  };
-
-  const togglePlay = (index) => {
-    if (isPlaying && index === playingRecordingIndex) {
-      setIsPlaying(false);
-    } else {
-      setIsPlaying(true);
-      setPlayingRecordingIndex(index);
-    }
-  };
-
-  const isCurrentlyPlaying = (index) => isPlaying && index === playingRecordingIndex;
-
-  const formatTimeComponent = (value) => (value < 10 ? `0${value}` : value);
 
   return (
     <View style={styles.container}>
-      <FlatList
-        ref={(ref) => (this.flatListRef = ref)}
-        data={recordings}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item, index }) => {
-          const durationInSeconds = item.duration / 1000;
-          const hours = Math.floor(durationInSeconds / 3600);
-          const minutes = Math.floor((durationInSeconds % 3600) / 60);
-          const seconds = Math.floor(durationInSeconds % 60);
-
-          return (
-            <View style={styles.recordingItem}>
-              <View style={styles.playbackContainer}>
-                <Text style={styles.titleText}>{item.title}</Text>
-                <TouchableOpacity onPress={() => togglePlay(index)}>
-                  <Icon
-                    name={isCurrentlyPlaying(index) ? 'pause' : 'play-arrow'}
-                    size={20}
-                    color="white"
-                  />
-                </TouchableOpacity>
-                <View>
-                  <Text style={styles.playbackText}>
-                    {`${formatTimeComponent(hours)}:${formatTimeComponent(
-                      minutes
-                    )}:${formatTimeComponent(seconds)}`}
-                  </Text>
-                </View>
-              </View>
-            </View>
-          );
-        }}
-      />
+        {getRecordingLines()}
       <View style={styles.record}>
-        <TouchableOpacity style={styles.recordButton} onPress={toggleRecording}>
-          <Icon name={isRecording ? 'stop' : 'mic'} size={30} color="white" />
-        </TouchableOpacity>
-
-        {isRecording && (
-          <View style={styles.recordingInfo}>
-            <TouchableOpacity style={styles.pauseButton} onPress={togglePause}>
-              <Icon name={isPaused ? 'play-arrow' : 'pause'} size={20} color="white" />
-            </TouchableOpacity>
-            <Text style={styles.recordingTime}>{elapsedTime}s</Text>
-            <TextInput
-              style={styles.titleInput}
-              placeholder="Recording Title"
-              onChangeText={(text) => setRecordingTitle(text)}
-              value={recordingTitle}
-            />
-          </View>
+      <TouchableOpacity style={styles.recordButton} onPress={recording ? stopRecording : startRecording}>
+        <Text style={styles.buttonText}>{recording ? 'Stop Recording' : 'Start Recording'}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.recordButton} onPress={clearRecordings}>
+        <Text style={styles.buttonText}>{recordings.length > 0 ? 'Clear Recordings' : ''}</Text>
+      </TouchableOpacity>
+      {isRecording && (
+          <TextInput
+            style={styles.titleInput}
+            placeholder="Recording Title"
+            onChangeText={(text) => setRecordingTitle(text)}
+            value={recordingTitle}
+          />
         )}
       </View>
     </View>
@@ -183,6 +177,7 @@ export default function AudioScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    flexDirection: 'column',
   },
   recordingItem: {
     padding: 10,
@@ -191,8 +186,9 @@ const styles = StyleSheet.create({
   },
   playbackContainer: {
     flexDirection: 'row',
+    justifyContent: 'space-between', // Aligns items with space between them
     alignItems: 'center',
-    backgroundColor: '#FFBF6B',
+    backgroundColor: '#FCCA00',
     borderColor: '#black',
     borderWidth: 2,
     padding: 15,
@@ -208,10 +204,20 @@ const styles = StyleSheet.create({
     width: '90%',
     alignSelf: 'center',
     marginBottom: 10,
+    marginTop: 10
+  },
+  playbackButton: {
+    color: 'black',
+    padding: 5,
+    borderRadius: 5,
+    backgroundColor: '#4CAF50',
   },
   playbackText: {
     color: 'black',
-    margin: 10,
+    margin: 10
+  },
+  playback: {
+    paddingLeft: '50%'
   },
   titleText: {
     color: 'black',
@@ -232,14 +238,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   recordButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 200,
+    height: 40,
     backgroundColor: '#FCCA00',
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'absolute',
-    bottom: 20,
+    marginBottom: 20,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   recordingInfo: {
     flexDirection: 'column',
