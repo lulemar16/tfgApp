@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
   },
   titleInput: {
     height: 40,
-    width: '200%',
+    width: '90%',
     borderColor: 'gray',
     borderWidth: 1,
     marginTop: 5,
