@@ -8,30 +8,30 @@ import {
 } from "react-native";
 import ToDoItem from "../../components/ToDoItem";
 import Colors from "../../constants/Colors";
-import { getFirestore, doc, collection, onSnapshot, orderBy, query, addDoc, deleteDoc } from 'firebase/firestore';
+import { getFirestore, doc, collection, onSnapshot, orderBy, query, addDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
 const auth = getAuth();
 const db = getFirestore();
-const userUID = auth.currentUser ? auth.currentUser.uid : "";
+const userUID = auth.currentUser ? auth.currentUser.uid : "anonymous";
 
 export default ({ navigation, route }) => {
     const [toDoItems, setToDoItems] = useState([]);
     const [newItem, setNewItem] = useState(null);
 
-    // const toDoItemsRef = collection(
-    //     db,
-    //     'users',
-    //     userUID,
-    //     'lists',
-    //     route.params.listId,
-    //     'todoItems'
-    // );
-
     const toDoItemsRef = collection(
-        doc(db, 'users', userUID, 'lists', route.params.listId),
+        db,
+        'users',
+        userUID,
+        'lists',
+        route.params.listId,
         'todoItems'
     );
+
+    // const toDoItemsRef = collection(
+    //     doc(db, 'users', userUID, 'lists', route.params.listId),
+    //     'todoItems'
+    // );
     
     // useEffect(() => {
     //     if (newItem) {
@@ -83,13 +83,12 @@ export default ({ navigation, route }) => {
     }, [newItem]);
 
     const addItemToLists = async () => {
-        console.log('----2')
         setNewItem({ text: '', isChecked: false, new: true });
-        console.log('-----', newItem)
     };
 
     const removeItemFromLists = async (index) => {
         const itemToRemove = toDoItems[index];
+        console.log(itemToRemove.id)
         await deleteDoc(doc(toDoItemsRef, itemToRemove.id));
     };
 
@@ -113,8 +112,13 @@ export default ({ navigation, route }) => {
                                 let data = { text, isChecked: !isChecked };
                                 if (id) {
                                     data.id = id;
+                                    console.log('---id: ', id)
                                 }
                                 addDoc(toDoItemsRef, data);
+                                let newdata = {
+                                    id : toDoItemsRef.id
+                                }
+                                updateDoc(toDoItemsRef, newdata)
                             }}
                             onChangeText={(newText) => {
                                 if (params.new) {

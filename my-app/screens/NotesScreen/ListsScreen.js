@@ -41,7 +41,9 @@ export default function ToDoScreen ( ) {
     const [lists, setLists] = useState([]);
     // const userRef = doc(db, 'users', userUID);
     // const listsRef = collection(userRef, 'lists');
-    const listsRef = collection(db, 'users', userUID, 'lists');
+    // const listsRef = collection(db, 'users', userUID, 'lists');
+    const listsRef = collection(doc(db, 'users', userUID), 'lists');
+
 
     const fetchAndSortLists = async () => {
       const listsQuery = query(listsRef, orderBy('index'));
@@ -119,8 +121,6 @@ export default function ToDoScreen ( ) {
                                     listId: id,
                                 });
                             }}
-                            // onPress={() => {console.log('id:' ,id)
-                            // }}
                             onOptions={() => {
                                 navigation.navigate("Edit", {
                                     title,

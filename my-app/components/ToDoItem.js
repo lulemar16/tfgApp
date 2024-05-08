@@ -26,7 +26,7 @@ const EditableText = ({ isChecked, onChangeText, text, ...props }) => {
                     placeholder={"Add new item here"}
                     onSubmitEditing={() => {}}
                     maxLength={30}
-                    style={[styles.input, { outline: "none" }]}
+                    style={styles.input}
                     onBlur={() => {
                         props.onBlur && props.onBlur();
                         setEditMode(false);
@@ -38,9 +38,8 @@ const EditableText = ({ isChecked, onChangeText, text, ...props }) => {
                         styles.text,
                         {
                             color: isChecked ? Colors.lightGray : Colors.black,
-                            textDecoration: isChecked ? "line-through" : "none",
                         },
-                    ]}
+                    ]}                
                 >
                     {text}
                 </Text>
@@ -57,7 +56,7 @@ export default ({
     onDelete,
     ...props
 }) => {
-    console.log(props.new);
+    // console.log(props.new);
     return (
         <View style={styles.container}>
             <View style={{ flexDirection: "row", flex: 1 }}>

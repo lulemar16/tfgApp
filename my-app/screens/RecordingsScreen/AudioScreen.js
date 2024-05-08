@@ -21,10 +21,13 @@ export default function AudioScreen() {
   const [recordingTitle, setRecordingTitle] = useState('');
   const [recording, setRecording ] = useState();
 
-  useEffect(() => {
+  useEffect(() => {    
     const fetchData = async () => {
       const recordsSnapshot = await getDocs(recordsRef);
-      const recordsData = recordsSnapshot.docs.map(doc => doc.data());
+      const recordsData = recordsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
       setRecordings(recordsData);
       console.log('records: ', recordings);
     };
@@ -149,7 +152,7 @@ export default function AudioScreen() {
     } catch (error) {
       console.error('Error deleting recording: ', error);
     }
-  };
+  };  
 
   return (
     <View style={styles.container}>
@@ -244,6 +247,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
+    marginTop: 20
   },
   buttonText: {
     color: 'white',
