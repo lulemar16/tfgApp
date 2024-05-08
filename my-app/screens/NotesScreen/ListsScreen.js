@@ -39,9 +39,6 @@ const ListButton = ({ title, color, onPress, onDelete, onOptions }) => {
 
 export default function ToDoScreen ( ) {
     const [lists, setLists] = useState([]);
-    // const userRef = doc(db, 'users', userUID);
-    // const listsRef = collection(userRef, 'lists');
-    // const listsRef = collection(db, 'users', userUID, 'lists');
     const listsRef = collection(doc(db, 'users', userUID), 'lists');
 
 

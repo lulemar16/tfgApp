@@ -12,9 +12,7 @@ const userUID = auth.currentUser ? auth.currentUser.uid : "anonymous";
 
 export default function AudioScreen() {
 
-  // const userRef = doc(db, 'users', userUID);
   const recordsRef = collection(doc(db, 'users', userUID), 'recordings');
-  // const recordsRef = collection(db, 'users', userUID, 'recordings');
 
   const [isRecording, setIsRecording] = useState(false);
   const [recordings, setRecordings] = useState([]);
@@ -189,7 +187,7 @@ const styles = StyleSheet.create({
   },
   playbackContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between', // Aligns items with space between them
+    justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#FCCA00',
     borderColor: '#black',

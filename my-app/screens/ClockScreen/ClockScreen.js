@@ -47,18 +47,8 @@ const ClockScreen = () => {
   const notificationListener = useRef();
   const responseListener = useRef();
 
-  // const userRef = doc(db, 'users', userUID);
-  // const alarmsRef = collection(userRef, 'alarms');
-  // const alarmsRef = collection(db, 'users', userUID, 'alarms');
   const alarmsRef = collection(doc(db, 'users', userUID), 'alarms');
-
-  // const timersRef = collection(userRef, 'timers');
-  // const timersRef = collection(db, 'users', userUID, 'timers');
-  const timersRef = collection(doc(db, 'users', userUID), 'timers');
-
-
-  // const deadlinesRef = collection(userRef, 'deadlines');
-  // const deadlinesRef = collection(db, 'users', userUID, 'deadlines');  
+  const timersRef = collection(doc(db, 'users', userUID), 'timers');  
   const deadlinesRef = collection(doc(db, 'users', userUID), 'deadlines');
 
 
