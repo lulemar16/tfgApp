@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, ScrollView, Button } from 'react-native';
+import { View, ScrollView, Button, Alert } from 'react-native';
 import AlarmsSection from './AlarmsScreen';
 import TimersSection from './TimersScreen';
 import DeadlinesSection from './DeadlinesScreen';
@@ -17,7 +17,7 @@ import Constants from 'expo-constants';
 
 const auth = getAuth();
 const db = getFirestore();
-const userUID = auth.currentUser ? auth.currentUser.uid : "";
+const userUID = auth.currentUser ? auth.currentUser.uid : "anonymous";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -47,15 +47,20 @@ const ClockScreen = () => {
   const notificationListener = useRef();
   const responseListener = useRef();
 
-  const userRef = doc(db, 'users', userUID);
-  const alarmsRef = collection(userRef, 'alarms');
+  // const userRef = doc(db, 'users', userUID);
+  // const alarmsRef = collection(userRef, 'alarms');
   // const alarmsRef = collection(db, 'users', userUID, 'alarms');
+  const alarmsRef = collection(doc(db, 'users', userUID), 'alarms');
 
-  const timersRef = collection(userRef, 'timers');
+  // const timersRef = collection(userRef, 'timers');
   // const timersRef = collection(db, 'users', userUID, 'timers');
+  const timersRef = collection(doc(db, 'users', userUID), 'timers');
 
-  const deadlinesRef = collection(userRef, 'deadlines');
-  // const deadlinesRef = collection(db, 'users', userUID, 'deadlines');
+
+  // const deadlinesRef = collection(userRef, 'deadlines');
+  // const deadlinesRef = collection(db, 'users', userUID, 'deadlines');  
+  const deadlinesRef = collection(doc(db, 'users', userUID), 'deadlines');
+
 
   // useEffect(() => {
   //   const timerInterval = setInterval(updateTimers, 1000);
@@ -360,6 +365,40 @@ const ClockScreen = () => {
     });
   };
 
+  const confirmDeleteAlarm = (alarm) => {
+    
+    Alert.alert(
+      'Confirm Deletion',
+      'Are you sure you want to delete this alarm?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', onPress: () => removeAlarm(alarm) },
+      ]
+    );
+  }
+
+  const confirmDeleteTimer = (timer) => {
+    Alert.alert(
+      'Confirm Deletion',
+      'Are you sure you want to delete this timer?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', onPress: () => removeTimer(timer) },
+      ]
+    ); 
+  };
+
+  const confirmDeleteDeadline = (deadline) => {
+    Alert.alert(
+      'Confirm Deletion',
+      'Are you sure you want to delete this deadline?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', onPress: () => removeDeadline(deadline) },
+      ]
+    ); 
+  };
+
   return (
       <ScrollView style={styles.container}>
         <Button
@@ -376,7 +415,7 @@ const ClockScreen = () => {
           showAlarmPicker={showAlarmPicker}
           selectedAlarmTime={selectedAlarmTime}
           addAlarm={addAlarm}
-          removeAlarm={removeAlarm}
+          removeAlarm={confirmDeleteAlarm}
           toggleAlarm={(index) => toggleAlarm(index)}
           setShowAlarmPicker={setShowAlarmPicker}
           setSelectedAlarmTime={setSelectedAlarmTime}
@@ -385,7 +424,7 @@ const ClockScreen = () => {
           timers={timers}
           newTimer={newTimer}
           addTimer={addTimer}
-          removeTimer={removeTimer}
+          removeTimer={confirmDeleteTimer}
           toggleTimer={(index) => toggleTimer(index)}
           setNewTimer={setNewTimer}
         />
@@ -397,7 +436,7 @@ const ClockScreen = () => {
           showDeadlinePicker={showDeadlinePicker}
           selectedDeadlineTime={selectedDeadlineTime}
           addDeadline={addDeadline}
-          removeDeadline={removeDeadline}
+          removeDeadline={confirmDeleteDeadline}
           // toggleDeadline={(index) => toggleDeadline(index)}
           setShowDeadlinePicker={setShowDeadlinePicker}
         />
