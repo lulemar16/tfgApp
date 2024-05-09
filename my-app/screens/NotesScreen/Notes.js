@@ -10,7 +10,6 @@ import dayjs from 'dayjs';
 const auth = getAuth();
 const db = getFirestore();
 const userUID = auth.currentUser ? auth.currentUser.uid : "anonymous";
-console.log('USER: ', userUID);
 
 const ListButton = ({ title, date, color, onPress, onDelete, onOptions }) => {
   return (
@@ -37,14 +36,8 @@ export default function Notes() {
 
 
   const fetchAndSortNotes = async () => {
-    // const notesQuery = query(notesRef, orderBy('date'));
-    // const snapshot = await onSnapshot(notesQuery);
-    // const sortedNotes = snapshot.docs.map((doc) => doc.data());
-    // return sortedNotes;
-    
     const notesSnapshot = await getDocs(
       query(notesRef, orderBy("date"))
-      // orderBy("timestamp", "desc") for ordering in descending order
     );
     const notesData = notesSnapshot.docs.map(doc => doc.data());
     return notesData;
@@ -53,15 +46,6 @@ export default function Notes() {
   const navigation = useNavigation();
 
   useEffect(() => {
-    // const unsubscribe = onSnapshot(notesRef, (snapshot) => {
-    //     const sortedNotes = snapshot.docs.map((doc) => doc.data()).sort((a, b) => a.index - b.index);
-    //     setNotes(sortedNotes);
-    //     console.log('notes: ', notes);
-    // });
-
-    // return unsubscribe;
-    // const sortedNotes = fetchAndSortNotes();
-    // setNotes(sortedNotes);
     const fetchData = async () => {
       const notesSnapshot = await getDocs(notesRef);
       const notesData = notesSnapshot.docs.map(doc => doc.data());
@@ -160,18 +144,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#f0f0f0',
-  },
-  button: {
-    backgroundColor: '#FCCA00',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 20,
-  },
-  buttonText: {
-    textAlign: 'center',
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   listItemContainer: {
     marginBottom: 20,

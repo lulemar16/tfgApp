@@ -8,14 +8,14 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "../../constants/Colors";
-import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, deleteDoc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, orderBy, getDoc, collection, getDocs, addDoc, deleteDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import {useNavigation} from "@react-navigation/native";
 
 const auth = getAuth();
 const db = getFirestore();
-const userUID = auth.currentUser ? auth.currentUser.uid : "";
-
+const userUID = auth.currentUser ? auth.currentUser.uid : "anonymous";
+  
 const ListButton = ({ title, color, onPress, onDelete, onOptions }) => {
     return (
         <TouchableOpacity
@@ -41,29 +41,28 @@ export default function ToDoScreen ( ) {
     const [lists, setLists] = useState([]);
     const listsRef = collection(doc(db, 'users', userUID), 'lists');
 
-
     const fetchAndSortLists = async () => {
-      const listsQuery = query(listsRef, orderBy('index'));
-      const snapshot = await onSnapshot(listsQuery);
-      const sortedLists = snapshot.docs.map((doc) => doc.data());
-      return sortedLists;
+        const listsSnapshot = await getDocs(
+          query(listsRef, orderBy("index"))
+        );
+        const listsData = listsSnapshot.docs.map(doc => doc.data());
+        return listsData;
     };
 
 
     const navigation = useNavigation();
 
     useEffect(() => {
-        const unsubscribe = onSnapshot(listsRef, (snapshot) => {
-            const sortedLists = snapshot.docs.map((doc) => doc.data()).sort((a, b) => a.index - b.index);
-            setLists(sortedLists);
-        });
-    
-        return unsubscribe;
+        const fetchData = async () => {
+            const listsSnapshot = await getDocs(listsRef);
+            const listsData = listsSnapshot.docs.map(doc => doc.data());
+            setLists(listsData); 
+        };
+        fetchData();  
     }, []);
     
 
     const addItemToLists = async ({ title, color }) => {
-        const lists = fetchAndSortLists();
         const index = lists.length > 0 ? lists[lists.length - 1].index + 1 : 0;
         const docRef = await addDoc(collection(db, 'users', userUID, 'lists'), {
             title,
@@ -75,6 +74,8 @@ export default function ToDoScreen ( ) {
             id: docRef.id
         };
         updateDoc(docRef, newData);
+        const sortedLists = await fetchAndSortLists();
+        setLists(sortedLists);
     };
 
     const removeItemFromLists = async (id) => {
@@ -130,7 +131,7 @@ export default function ToDoScreen ( ) {
                                 });
                             }}
                             onDelete={() => deleteList(id)}
-                        />
+                        /> 
                     );
                 }}
             />
@@ -141,19 +142,20 @@ export default function ToDoScreen ( ) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fff",
+        padding: 20,
+        backgroundColor: '#f0f0f0',
     },
     button: {
-      backgroundColor: '#FCCA00',
-      padding: 10,
-      borderRadius: 5,
-      marginBottom: 20,
+        backgroundColor: '#FCCA00',
+        padding: 10,
+        borderRadius: 5,
+        marginBottom: 20,
     },
     buttonText: {
-      textAlign: 'center',
-      color: 'white',
-      fontSize: 16,
-      fontWeight: 'bold',
+        textAlign: 'center',
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
     itemTitle: { fontSize: 24, padding: 5, color: "white" },
     itemContainer: {
