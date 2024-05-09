@@ -4,6 +4,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import Notes from '../screens/NotesScreen/Notes';
 import ListsScreen from '../screens/NotesScreen/ListsScreen';
 import TodoStackScreen from "./TodoStack";
+import NoteStackScreen from "./NoteStack";
 
 const NotesStackScreen = () => {
   const notesNav = createMaterialTopTabNavigator();
@@ -15,8 +16,8 @@ const NotesStackScreen = () => {
 
   return (
     <notesNav.Navigator screenOptions={screenOptions}>
+      <notesNav.Screen name="Notes" component={NoteStackScreen} />
       <notesNav.Screen name="To-do's" component={TodoStackScreen} />
-      <notesNav.Screen name="Notes" component={Notes} />
     </notesNav.Navigator>
   );
 };

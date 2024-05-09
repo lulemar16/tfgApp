@@ -1,77 +1,159 @@
-import { Text, StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
+import { Text, StyleSheet, View, ScrollView, TouchableOpacity, FlatList } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import CreateNote from './CreateNote';
-import { ListItem } from '@rneui/base';
-import { ListItemChevron } from '@rneui/base/dist/ListItem/ListItem.Chevron';
-import { ListItemContent } from '@rneui/base/dist/ListItem/ListItem.Content';
-import { ListItemTitle } from '@rneui/base/dist/ListItem/ListItem.Title';
-import { ListItemSubtitle } from '@rneui/base/dist/ListItem/ListItem.Subtitle';
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import { getFirestore, doc, query, orderBy, setDoc, getDoc, collection, getDocs, addDoc, deleteDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
+import { useNavigation } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
+import dayjs from 'dayjs';
+
 
 const auth = getAuth();
 const db = getFirestore();
+const userUID = auth.currentUser ? auth.currentUser.uid : "anonymous";
+console.log('USER: ', userUID);
 
-export default function Notes(props) {
-  const [list, setList] = useState([]);
+const ListButton = ({ title, date, color, onPress, onDelete, onOptions }) => {
+  return (
+    <TouchableOpacity
+        style={[styles.itemContainer, { backgroundColor: color }]}
+        onPress={onPress}
+    >
+        <View style={styles.noteText}>
+            <Text style={styles.itemTitle}>{title}</Text>
+            <Text style={styles.itemDate}>{date}</Text>
+        </View>
+        <View style={{ flexDirection: "row" }}>
+            <TouchableOpacity onPress={onDelete}>
+                <Ionicons name="trash-outline" size={24} color="white" />
+            </TouchableOpacity>
+        </View>
+    </TouchableOpacity>
+  );
+};
 
-  // call the list of documents
+export default function Notes() {
+  const [notes, setNotes] = useState([]);
+  const notesRef = collection(doc(db, 'users', userUID), 'notes');
+
+
+  const fetchAndSortNotes = async () => {
+    // const notesQuery = query(notesRef, orderBy('date'));
+    // const snapshot = await onSnapshot(notesQuery);
+    // const sortedNotes = snapshot.docs.map((doc) => doc.data());
+    // return sortedNotes;
+    
+    const notesSnapshot = await getDocs(
+      query(notesRef, orderBy("date"))
+      // orderBy("timestamp", "desc") for ordering in descending order
+    );
+    const notesData = notesSnapshot.docs.map(doc => doc.data());
+    return notesData;
+  };
+
+  const navigation = useNavigation();
+
   useEffect(() => {
-    const getList = async () => {
-      try {
-        const userDocRef = doc(db, 'users', auth.currentUser.uid);
-        const userNotesCollectionRef = collection(userDocRef, 'notes');
-        const querySnapshot = await getDocs(userNotesCollectionRef);
-        const docs = [];
-        querySnapshot.forEach((doc) => {
-          const { title, detail, day, time } = doc.data();
-          docs.push({
-            id: doc.id,
-            title,
-            detail,
-            day,
-            time,
-          });
-        });
-        setList(docs);
-      } catch (error) {
-        console.log(error);
-      }
+    // const unsubscribe = onSnapshot(notesRef, (snapshot) => {
+    //     const sortedNotes = snapshot.docs.map((doc) => doc.data()).sort((a, b) => a.index - b.index);
+    //     setNotes(sortedNotes);
+    //     console.log('notes: ', notes);
+    // });
+
+    // return unsubscribe;
+    // const sortedNotes = fetchAndSortNotes();
+    // setNotes(sortedNotes);
+    const fetchData = async () => {
+      const notesSnapshot = await getDocs(notesRef);
+      const notesData = notesSnapshot.docs.map(doc => doc.data());
+      setNotes(notesData);
     };
-    getList();
-  }, []); // volver a poner [list] en vez de []
+    fetchData();
+    
+  }, []);
+
+  const formatDate = (date) => {
+    const jsDate = new Date(date.seconds * 1000); 
+    const parsedDate = dayjs(jsDate);
+    return parsedDate.format('DD.MM.YYYY [at] HH:mm');
+  };
+
+
+  const addItemToNotes = async ({ title, content, date, color }) => {
+    const index = notes.length > 0 ? notes[notes.length - 1].index + 1 : 0;
+    const docRef = await addDoc(notesRef, {
+        title,
+        content,
+        date,
+        color,
+        index
+    });
+    console.log('Document written with ID: ', docRef.id);
+    const newData = {
+        id: docRef.id
+    };
+    updateDoc(docRef, newData);
+    const sortedNotes = await fetchAndSortNotes();
+    setNotes(sortedNotes);
+  };
+
+  const updateNote = async ({ id, title, content, date, color }) => {
+    const newData = {
+      title: title,
+      content: content,
+      date: date,
+      color: color,
+    };
+    const docRef = doc(notesRef, id);
+    updateDoc(docRef, newData);
+    const sortedNotes = await fetchAndSortNotes();
+    setNotes(sortedNotes);
+  };
+
+  const deleteNote = async (id) => {
+    const noteRef = doc(notesRef, id);
+    await deleteDoc(noteRef);
+  };
 
   return (
     <ScrollView style={styles.container}>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => {
-          props.navigation.navigate('CreateNote');
-        }}
-      >
+        onPress={() =>
+          navigation.navigate("EditNote", { saveChanges: addItemToNotes })
+        }
+        >
         <Text style={styles.buttonText}>New note</Text>
       </TouchableOpacity>
-
-      {list.map((note) => (
-        <ListItem
-          bottomDivider
-          key={note.id}
-          onPress={() => {
-            props.navigation.navigate('Details', { noteId: note.id });
-          }}
-          style={styles.listItemContainer}
-        >
-          <ListItemChevron />
-
-          <ListItemContent>
-            <ListItemTitle style={styles.title}>{note.title}</ListItemTitle>
-            <ListItemSubtitle>{note.day}</ListItemSubtitle>
-          </ListItemContent>
-        </ListItem>
-      ))}
-    </ScrollView>
+      <FlatList
+        data={notes}
+        renderItem={({ item: { title, content, date, color, id, index } }) => {
+            return (
+                <ListButton
+                    title={title}
+                    date={formatDate(date)}
+                    color={color}
+                    id={id}
+                    navigation={navigation}
+                    onPress={() => {
+                        navigation.navigate("DetailedNote", {
+                            id,
+                            title,
+                            content,
+                            date,
+                            color,
+                            listId: id,
+                            saveChanges: updateNote
+                        });
+                    }}
+                    onDelete={() => deleteNote(id)}
+                />
+            );
+        }}
+    />
+    </ScrollView> 
   );
-}
+};
+
 
 const styles = StyleSheet.create({
   container: {
@@ -100,5 +182,64 @@ const styles = StyleSheet.create({
   },
   title: {
     fontWeight: 'bold',
+  },
+  button: {
+    backgroundColor: '#FCCA00',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 20,
+  },
+  buttonText: {
+    textAlign: 'center',
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  noteText:{
+    flexDirection: 'column'
+  },
+  itemTitle: { 
+    fontSize: 24, 
+    padding: 5, 
+    color: "white" 
+  },
+  itemDate: { 
+    fontSize: 18, 
+    padding: 5, 
+    color: "grey" 
+  },
+  itemContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      height: 100,
+      flex: 1,
+      borderRadius: 20,
+      marginHorizontal: 20,
+      marginVertical: 10,
+      padding: 15,
+  },
+  icon: {
+      padding: 5,
+      fontSize: 24,
+  },
+  centeredView: {
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 50,
+  },
+  modalView: {
+      backgroundColor: "white",
+      borderRadius: 20,
+      padding: 35,
+      alignItems: "center",
+      shadowColor: "#000",
+      shadowOffset: {
+          width: 0,
+          height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
   },
 });

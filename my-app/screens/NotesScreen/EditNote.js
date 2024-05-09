@@ -30,7 +30,6 @@ const colorList = [
 ];
 
 export default ({ navigation, route }) => {
-    const [id, setId] = useState(route.params.id || "");
     const [title, setTitle] = useState(route.params.title || "");
     const [content, setContent] = useState(route.params.content || "");
     const [date, setDate] = useState(route.params.date || "");
@@ -96,7 +95,7 @@ export default ({ navigation, route }) => {
                     if (title.length > 1) {
                         const date = Timestamp.fromDate(new Date());
                         console.log('now: ', date);
-                        route.params.saveChanges({ id, title, content, date , color });
+                        route.params.saveChanges({ title, content, date , color });
                         navigation.dispatch(CommonActions.goBack());
                     } else {
                         setValidity(false);
