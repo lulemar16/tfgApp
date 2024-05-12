@@ -4,7 +4,6 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import YouTubePlayer from 'react-native-youtube-iframe';
 import CarouselComponent from './CarrouselImages';
 import {useNavigation} from "@react-navigation/native";
-import { Button } from '@rneui/base';
 
 import { onAuthStateChanged } from '@firebase/auth';
 import { getAuth } from 'firebase/auth';
@@ -42,7 +41,7 @@ export default function HomeScreen() {
             {/* User information */}
             <View style={styles.userInfo}>
               <Text style={styles.username}>{user.email}</Text>
-              <Text style={styles.followersCount}>1000 followers</Text>
+              {/* <Text style={styles.followersCount}>1000 followers</Text> */}
             </View>
             
             <TouchableOpacity style={styles.button} 

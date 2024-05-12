@@ -101,15 +101,16 @@ export default function ProfileScreen({navigation} ) {
           <TouchableOpacity style={styles.changePictureButton} onPress={pickImage}>
             <Text style={styles.changePictureButtonText}>Change photo</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.changePictureButton}>
-            <Text style={styles.changePictureButtonText}>Edit profile</Text>
+          {/* Logout Section */}
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogOut}>
+            <Text style={styles.logoutButtonText}>Log Out</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       {/* User Information Section */}
       <View style={styles.userInfoSection}>
-        <Text style={styles.userInfoLabel}>Email: {auth.currentUser?.email}</Text>
+        <Text style={styles.userInfoLabel}>{auth.currentUser?.email}</Text>
       </View>
 
       {/* Change Password Section */}
@@ -139,10 +140,6 @@ export default function ProfileScreen({navigation} ) {
         <Text style={styles.buttonText}>Change password</Text>
       </TouchableOpacity>
 
-      {/* Logout Section */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogOut}>
-        <Text style={styles.logoutButtonText}>Log Out</Text>
-      </TouchableOpacity>
     </View>
     </ScrollView>
   );
@@ -192,7 +189,7 @@ const styles = StyleSheet.create({
     height: 40,
     borderColor: 'gray',
     borderWidth: 1,
-    marginBottom: 20,
+    marginBottom: 10,
     padding: 10,
     width: '80%',
   },
@@ -200,6 +197,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FCCA00',
     padding: 10,
     borderRadius: 5,
+    marginBottom:10
   },
   buttonText: {
     textAlign: 'center',
