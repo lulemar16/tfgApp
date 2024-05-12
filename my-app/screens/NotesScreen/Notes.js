@@ -40,20 +40,19 @@ export default function Notes() {
       query(notesRef, orderBy("date"))
     );
     const notesData = notesSnapshot.docs.map(doc => doc.data());
-    return notesData;
+    return notesData; 
   };
 
   const navigation = useNavigation();
 
   useEffect(() => {
     const fetchData = async () => {
-      const notesSnapshot = await getDocs(notesRef);
-      const notesData = notesSnapshot.docs.map(doc => doc.data());
-      setNotes(notesData);
+      const sortedNotes = await fetchAndSortNotes();
+      setNotes(sortedNotes);
     };
     fetchData();
-    
   }, []);
+  
 
   const formatDate = (date) => {
     const jsDate = new Date(date.seconds * 1000); 
@@ -81,6 +80,11 @@ export default function Notes() {
   };
 
   const updateNote = async ({ id, title, content, date, color }) => {
+    if (!id) {
+      console.error("Invalid note id");
+      return;
+    }
+    
     const newData = {
       title: title,
       content: content,

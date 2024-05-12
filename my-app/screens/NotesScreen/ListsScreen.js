@@ -7,8 +7,7 @@ import {
     FlatList,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import Colors from "../../constants/Colors";
-import { getFirestore, doc, setDoc, orderBy, getDoc, collection, getDocs, addDoc, deleteDoc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { getFirestore, query, doc, setDoc, orderBy, getDoc, collection, getDocs, addDoc, deleteDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import {useNavigation} from "@react-navigation/native";
 
@@ -37,7 +36,7 @@ const ListButton = ({ title, color, onPress, onDelete, onOptions }) => {
     );
 };
 
-export default function ToDoScreen ( ) {
+export default function ToDoScreen ( ) {   
     const [lists, setLists] = useState([]);
     const listsRef = collection(doc(db, 'users', userUID), 'lists');
 
@@ -54,8 +53,7 @@ export default function ToDoScreen ( ) {
 
     useEffect(() => {
         const fetchData = async () => {
-            const listsSnapshot = await getDocs(listsRef);
-            const listsData = listsSnapshot.docs.map(doc => doc.data());
+            const listsData = await fetchAndSortLists();
             setLists(listsData); 
         };
         fetchData();  
@@ -86,11 +84,21 @@ export default function ToDoScreen ( ) {
     const deleteList = async (id) => {
         const listRef = doc(listsRef, id);
         await deleteDoc(listRef);
+        setLists(fetchAndSortLists());
     };
     
 
-    const updateItemFromLists = async (id, item) => {
-        await updateDoc(doc(listsRef, id), item);
+    const updateLists = async (id, title, color) => {
+        if (!id) {
+            console.error("Invalid note id");
+            return;
+        }
+        const newData = {
+            title: title,
+            color: color
+        }
+        await updateDoc(doc(listsRef, id), newData);
+        setLists(fetchAndSortLists()); 
     };
 
     return (
@@ -118,17 +126,14 @@ export default function ToDoScreen ( ) {
                                     color,
                                     listId: id,
                                 });
-                            }}
-                            onOptions={() => {
+                            }}  
+                            onOptions={() => { 
                                 navigation.navigate("Edit", {
+                                    id,
                                     title,
                                     color,
-                                    saveChanges: (newItem) =>
-                                        updateItemFromLists(id, {
-                                            index,
-                                            ...newItem,
-                                        }),
-                                });
+                                    saveChanges: updateLists,
+                                }); 
                             }}
                             onDelete={() => deleteList(id)}
                         /> 

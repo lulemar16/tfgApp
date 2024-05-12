@@ -9,10 +9,8 @@ import {
 } from "react-native";
 import Colors from "../../constants/Colors";
 import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, deleteDoc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
 import ColorSelector from "../../components/ColorSelector";
 import Button from "../../components/Button";
-import dayjs from "dayjs";
 import { Timestamp } from 'firebase/firestore';
 
 
@@ -95,7 +93,6 @@ export default ({ navigation, route }) => {
                 onPress={() => {
                     if (title.length > 1) {
                         const date = Timestamp.fromDate(new Date());
-                        console.log('now: ', date);
                         route.params.saveChanges({ id, title, content, date , color });
                         navigation.dispatch(CommonActions.goBack());
                     } else {

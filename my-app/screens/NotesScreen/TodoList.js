@@ -31,13 +31,12 @@ export default ({ navigation, route }) => {
           </View>
         );
     };
-
+ 
     useEffect(() => { 
         const fetchData = async () => {
             const todosSnapshot = await getDocs(toDoItemsRef);
             const todosData = todosSnapshot.docs.map(doc => doc.data());
             setToDoItems(todosData);
-            console.log('Todos: ', toDoItems);
         }; 
         fetchData();
     }, []);

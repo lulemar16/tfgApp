@@ -94,7 +94,6 @@ export default ({ navigation, route }) => {
                 onPress={() => {
                     if (title.length > 1) {
                         const date = Timestamp.fromDate(new Date());
-                        console.log('now: ', date);
                         route.params.saveChanges({ title, content, date , color });
                         navigation.dispatch(CommonActions.goBack());
                     } else {
