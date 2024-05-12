@@ -6,11 +6,8 @@ import DeadlinesSection from './DeadlinesScreen';
 import CustomDateTimePickerModal from './DateTimePickerModal'; 
 import styles from './styles'; 
 import dayjs from 'dayjs';
-// import { ScrollView, GestureHandlerRootView  } from 'react-native-gesture-handler';
-// import { ScrollView } from 'react-native-virtualized-view'
 import { getFirestore, doc, setDoc, getDoc, collection, getDocs, addDoc, deleteDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import {useNavigation} from "@react-navigation/native";
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
@@ -51,12 +48,6 @@ const ClockScreen = () => {
   const timersRef = collection(doc(db, 'users', userUID), 'timers');  
   const deadlinesRef = collection(doc(db, 'users', userUID), 'deadlines');
 
-
-  // useEffect(() => {
-  //   const timerInterval = setInterval(updateTimers, 1000);
-  //   return () => clearInterval(timerInterval);
-  // }, [timers]);
-
   useEffect(() => {
     const fetchDataAndRemovePassedDeadlines = async () => {
       // Fetch data for alarms, timers, and deadlines
@@ -86,9 +77,6 @@ const ClockScreen = () => {
     };
   
     fetchDataAndRemovePassedDeadlines();
-  
-    const interval = setInterval(fetchDataAndRemovePassedDeadlines, 60000);
-    return () => clearInterval(interval);
   }, []);  
 
 
@@ -143,12 +131,9 @@ const ClockScreen = () => {
         alert('Failed to get push token for push notification!');
         return;
       }
-      // Learn more about projectId:
-      // https://docs.expo.dev/push-notifications/push-notifications-setup/#configure-projectid
-      token = await Notifications.getExpoPushTokenAsync({
+        token = await Notifications.getExpoPushTokenAsync({
         projectId: Constants.expoConfig.extra.eas.projectId,
       });
-      // console.log(token);
     } else {
       alert('Must use physical device for Push Notifications');
     }
@@ -236,9 +221,7 @@ const ClockScreen = () => {
   };
 
   const updateTimers = async () => {
-    // console.log("Updating timers...");
     const updatedTimers = timers.map(async (timer, index) => {
-      // console.log(`Timer ${index + 1}: ${timer.time}`);
       if (!timer.paused) {
         const [hours, minutes, seconds] = timer.time.split(':').map(Number);
         let totalSeconds = hours * 3600 + minutes * 60 + seconds;
@@ -247,7 +230,6 @@ const ClockScreen = () => {
         if (totalSeconds === 0) {
           const initialTime = timer.initialTime;
           await toggleTimer(index);
-          // console.log(`Timer ${index + 1} reached 0 seconds. Resetting to initial time: ${initialTime}`);
           return { ...timer, time: initialTime };
         }
   
@@ -255,14 +237,12 @@ const ClockScreen = () => {
           .startOf('day')
           .add(totalSeconds, 'seconds')
           .format('HH:mm:ss');
-        // console.log(`Timer ${index + 1} updated to: ${newTime}`);
         return { ...timer, time: newTime };
       }
       return timer;
     });
   
     const updatedTimersData = await Promise.all(updatedTimers);
-    // console.log("Updated timers:", updatedTimersData);
     setTimers(updatedTimersData);
   };  
   
@@ -312,12 +292,6 @@ const ClockScreen = () => {
     setNewDeadlineTitle('');
     setSelectedDeadlineTime(new Date());
   };
-
-  // const toggleDeadline = (index) => {
-  //   const updatedDeadlines = [...deadlines];
-  //   updatedDeadlines[index].enabled = !updatedDeadlines[index].enabled;
-  //   setDeadlines(updatedDeadlines);
-  // };
 
   const removeDeadline = async (index) => {
     const deadlineToRemove = deadlines[index];
@@ -427,7 +401,6 @@ const ClockScreen = () => {
           selectedDeadlineTime={selectedDeadlineTime}
           addDeadline={addDeadline}
           removeDeadline={confirmDeleteDeadline}
-          // toggleDeadline={(index) => toggleDeadline(index)}
           setShowDeadlinePicker={setShowDeadlinePicker}
         />
       </ScrollView>

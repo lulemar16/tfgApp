@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   FlatList,
 } from 'react-native';
-import DateTimePickerModal from './DateTimePickerModal';
 import styles from './styles'; 
 
 const TimersSection = (props) => {

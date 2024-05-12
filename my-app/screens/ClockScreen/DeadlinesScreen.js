@@ -20,7 +20,6 @@ const DeadlinesSection = (props) => {
       showDeadlinePicker,
       selectedDeadlineTime,
       addDeadline,
-      toggleDeadline,
       setShowDeadlinePicker,
       removeDeadline,
     } = props;

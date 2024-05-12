@@ -49,7 +49,7 @@ const AlarmsSection = (props) => {
             date={selectedAlarmTime}
             onConfirm={(date) => {
               setSelectedAlarmTime(date);
-              addAlarm(newAlarmTitle, date); // Ensure you are setting the title here
+              addAlarm(newAlarmTitle, date); 
             }}
             onCancel={() => setShowAlarmPicker(false)}
           />
