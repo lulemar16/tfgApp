@@ -18,6 +18,8 @@ export default function AudioScreen() {
   const [recordings, setRecordings] = useState([]);
   const [recordingTitle, setRecordingTitle] = useState('');
   const [recording, setRecording ] = useState();
+  const [playbackState, setPlaybackState] = useState(false);
+  const [soundObjectPlaying, setSoundObjectPlaying] = useState();
 
   useEffect(() => {    
     const fetchData = async () => {
@@ -91,9 +93,9 @@ export default function AudioScreen() {
            {recordingLine.title} | {recordingLine.duration}
           </Text>
           <View style={styles.playback}>
-            <TouchableOpacity style={styles.playbackButton} onPress={() => playRecording(recordingLine.uri)}>
-              <Text style={styles.buttonText}>{recordings.length > 0 ? '▶' : ''}</Text>
-            </TouchableOpacity>
+          <TouchableOpacity style={styles.playbackButton} onPress={() => playbackState ? pauseRecording() : playRecording(recordingLine.uri)}>
+            <Text style={styles.buttonText}>{playbackState ? '⏸️' : '▶'}</Text>
+          </TouchableOpacity>
           </View>
         </View>
       );
@@ -102,14 +104,36 @@ export default function AudioScreen() {
 
   const playRecording = async (uri) => {
     const soundObject = new Audio.Sound();
-
+  
     try {
       await soundObject.loadAsync({ uri: uri });
       await soundObject.playAsync();
+  
+      // Set the playback state to true
+      setPlaybackState(true);
+  
+      // Set the sound object to state for later use
+      setSoundObjectPlaying(soundObject);
     } catch (error) {
       console.error('Error playing recording: ', error);
     }
-  }
+  };
+
+  const pauseRecording = async () => {
+
+    try {
+      if (soundObjectPlaying) {
+        await soundObjectPlaying.pauseAsync();
+  
+        // Set the playback state to false
+        setPlaybackState(false);
+        setSoundObjectPlaying();
+      }
+    } catch (error) {
+      console.error('Error pausing recording: ', error);
+    }
+  };
+  
 
   const clearRecordings = () => {
     setRecordings([]);
