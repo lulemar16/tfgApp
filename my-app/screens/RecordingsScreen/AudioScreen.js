@@ -27,7 +27,6 @@ export default function AudioScreen() {
         ...doc.data()
       }));
       setRecordings(recordsData);
-      console.log('records: ', recordings);
     };
     fetchData();
   }, []);

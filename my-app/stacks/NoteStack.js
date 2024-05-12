@@ -1,5 +1,4 @@
 import React from "react";
-import { View, Text } from "react-native";
 import { createStackNavigator } from '@react-navigation/stack';
 import Notes from '../screens/NotesScreen/Notes';
 import EditNote from "../screens/NotesScreen/EditNote";
