@@ -93,7 +93,7 @@ export default ({ navigation, route }) => {
                     />
                 )}
                 keyExtractor={(item) => item.id}
-            />
+            /> 
         </View>
     );
 };

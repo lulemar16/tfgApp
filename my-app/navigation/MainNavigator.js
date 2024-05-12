@@ -18,6 +18,7 @@ export default function MainNavigator() {
         activeTintColor: '#E99D42',
         labelStyle: {
           fontSize: 12,
+          textAlign: 'center'
         },
       }}
     >

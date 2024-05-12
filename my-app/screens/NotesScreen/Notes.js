@@ -120,7 +120,7 @@ export default function Notes() {
                     title={title}
                     date={formatDate(date)}
                     color={color}
-                    id={id}
+                    id={id}  
                     navigation={navigation}
                     onPress={() => {
                         navigation.navigate("DetailedNote", {

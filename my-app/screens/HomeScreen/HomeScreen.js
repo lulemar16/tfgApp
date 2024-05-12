@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Text, StyleSheet, View, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { Text, StyleSheet, View, ScrollView, TouchableOpacity, Image, FlatList } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import YouTubePlayer from 'react-native-youtube-iframe';
 import CarouselComponent from './CarrouselImages';
@@ -10,6 +10,14 @@ import { getAuth } from 'firebase/auth';
 
 
 const auth = getAuth();
+
+const videos = [
+  { id: '1', videoId: '_tV5LEBDs7w' },
+  { id: '2', videoId: 'EhLhE8865tU' },
+  { id: '3', videoId: 'ORnLOOiviDo' },
+  { id: '4', videoId: 'JH8_TSCi-2Y' },
+  { id: '5', videoId: 'h7gd9FpEL2w' },
+];
 
 export default function HomeScreen() {
 
@@ -25,6 +33,18 @@ export default function HomeScreen() {
   }, []);
 
   const navigation = useNavigation();
+
+  const renderVideoItem = ({ item }) => {
+    return (
+      <View style={styles.videoSection}>
+        <YouTubePlayer
+          height={210}
+          play={false}
+          videoId={item.videoId}
+        />
+      </View>
+    );
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -68,26 +88,34 @@ export default function HomeScreen() {
       </View>
       )}
 
-      {/* Video Section */}
-      <View style={styles.videoSection}>
-        <YouTubePlayer 
-        height={210} 
-        play={false} 
-        videoId='_tV5LEBDs7w' />
-      </View>
-
       {/* Carousel Section */}
       <View style={styles.carouselSection}>
         <CarouselComponent />
       </View>
 
       {/* Video Section */}
-      <View style={styles.videoSection}>
+      {/* <View style={styles.videoSection}>
+        <YouTubePlayer 
+        height={210} 
+        play={false} 
+        videoId='_tV5LEBDs7w' />
+      </View> */}
+
+      {/* Video Section */}
+      {/* <View style={styles.videoSection}>
         <YouTubePlayer 
         height={210} 
         play={false} 
         videoId='EhLhE8865tU' />
-      </View>
+      </View> */}
+
+      {/* Video Section */}
+      <FlatList
+        data={videos}
+        renderItem={renderVideoItem}
+        keyExtractor={item => item.id}
+        contentContainerStyle={{ paddingBottom: 20 }} 
+      />
 
       {/* Rest of the Screen */}
       <View style={styles.restOfScreen}>
@@ -108,7 +136,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderWidth: 2,
     borderColor: '#E99D42',
-    backgroundColor: '#E99D42',
+    backgroundColor: 'white',
     borderRadius: 10,
     margin: 10,
     shadowColor: '#000',
@@ -134,7 +162,7 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 15,
     fontWeight: 'bold',
-    color: '#fff',
+    color: 'black',
   },
   followersCount: {
     fontSize: 12,
@@ -156,7 +184,7 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   carouselSection: {
-    margin: 10,
+    margin: 0,
     height: 200,
   },
   restOfScreen: {

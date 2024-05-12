@@ -133,7 +133,7 @@ export default function ToDoScreen ( ) {
                                     title,
                                     color,
                                     saveChanges: updateLists,
-                                }); 
+                                });  
                             }}
                             onDelete={() => deleteList(id)}
                         /> 
