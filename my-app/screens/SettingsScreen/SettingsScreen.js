@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Text, StyleSheet, View, Switch, FlatList, TouchableOpacity } from 'react-native';
 import ContactScreen from './ContactScreen';
+import PrivacyLegalScreen from './PrivacyLegalScreen';
 import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
 
 export default function SettingsScreen() {
@@ -20,7 +21,6 @@ export default function SettingsScreen() {
     { id: '4', title: 'Auto-play Videos', value: autoPlayVideos, onChange: setAutoPlayVideos },
     { id: '5', title: 'Download over WiFi only', value: downloadOverWiFi, onChange: setDownloadOverWiFi },
     { id: '6', title: 'Font Size', value: fontSize, onChange: setFontSize },
-    { id: '7', title: 'Show Images', value: showImages, onChange: setShowImages },
     { id: '8', title: 'Send Usage Data', value: sendUsageData, onChange: setSendUsageData },
     // Add more settings as needed
   ];
@@ -51,7 +51,10 @@ export default function SettingsScreen() {
         keyExtractor={(item) => item.id}
         renderItem={renderSettingItem}
       />
-      <ContactScreen></ContactScreen>
+      <View style={styles.container2}>
+        <ContactScreen></ContactScreen>
+        <PrivacyLegalScreen></PrivacyLegalScreen>
+      </View>
     </View>
     </ScrollView>
     </GestureHandlerRootView>
@@ -62,6 +65,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+  },
+  container2: {
+    flex: 1,
   },
   settingItem: {
     flexDirection: 'row',
