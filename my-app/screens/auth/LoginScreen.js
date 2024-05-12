@@ -1,4 +1,3 @@
-// screens/LoginScreen.js
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity, Image } from 'react-native';
 import { getAuth } from 'firebase/auth';
@@ -111,8 +110,8 @@ const styles = StyleSheet.create({
     fontSize: 16
   },
   logo: {
-    width: 150, // Adjust the width and height according to your logo size
+    width: 150, 
     height: 150,
-    marginBottom: 20 // Add margin bottom to create space between logo and other elements
+    marginBottom: 20 
   }
 })

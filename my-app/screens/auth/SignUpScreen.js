@@ -1,4 +1,3 @@
-// screens/SignUpScreen.js
 import React, { useState } from 'react';
 import { Text, StyleSheet, View, TextInput, TouchableOpacity, Image } from 'react-native';
 import { signUp } from '../../services/AuthService';
@@ -18,11 +17,9 @@ const SignUpScreen = () => {
       try {
         const user = signUp(email, password);
         console.log('User signed up:', user);
-        // Navigate to the next screen or perform additional actions upon successful signup
         navigation.navigate('Login')
       } catch (error) {
         console.error('Sign-up error:', error.message);
-        // Handle the error (e.g., display an error message to the user)
       }
     }
   };
@@ -104,8 +101,8 @@ const styles = StyleSheet.create({
     fontSize: 16
   },
   logo: {
-    width: 150, // Adjust the width and height according to your logo size
+    width: 150, 
     height: 150,
-    marginBottom: 20 // Add margin bottom to create space between logo and other elements
+    marginBottom: 20 
   }
 })
