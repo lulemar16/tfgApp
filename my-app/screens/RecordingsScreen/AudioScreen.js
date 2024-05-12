@@ -94,7 +94,7 @@ export default function AudioScreen() {
           </Text>
           <View style={styles.playback}>
           <TouchableOpacity style={styles.playbackButton} onPress={() => playbackState ? pauseRecording() : playRecording(recordingLine.uri)}>
-            <Text style={styles.buttonText}>{playbackState ? '⏸️' : '▶'}</Text>
+            <Text style={styles.buttonText}>{playbackState ? '||' : '▶'}</Text>
           </TouchableOpacity>
           </View>
         </View>
