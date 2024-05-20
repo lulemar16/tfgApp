@@ -6,6 +6,8 @@ import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler
 
 export default function SettingsScreen() {
   const [darkMode, setDarkMode] = useState(false);
+  const [protaMode, setProtaMode] = useState(false);
+  const [deuteMode, setDeuteMode] = useState(false);
   const [notification, setNotification] = useState(true);
   const [language, setLanguage] = useState('English');
   const [autoPlayVideos, setAutoPlayVideos] = useState(true);
@@ -16,12 +18,12 @@ export default function SettingsScreen() {
 
   const settingsData = [
     { id: '1', title: 'Dark Mode', value: darkMode, onChange: setDarkMode },
-    { id: '2', title: 'Notifications', value: notification, onChange: setNotification },
-    { id: '3', title: 'Language', value: language, onChange: setLanguage },
-    { id: '4', title: 'Auto-play Videos', value: autoPlayVideos, onChange: setAutoPlayVideos },
-    { id: '5', title: 'Download over WiFi only', value: downloadOverWiFi, onChange: setDownloadOverWiFi },
-    { id: '6', title: 'Font Size', value: fontSize, onChange: setFontSize },
-    { id: '8', title: 'Send Usage Data', value: sendUsageData, onChange: setSendUsageData },
+    { id: '2', title: 'Protanopia Mode', value: protaMode, onChange: setProtaMode },
+    { id: '3', title: 'Deuteranopia Mode', value: deuteMode, onChange: setDeuteMode },
+    { id: '4', title: 'Notifications', value: notification, onChange: setNotification },
+    { id: '5', title: 'Language', value: language, onChange: setLanguage },
+    { id: '6', title: 'Auto-play Videos', value: autoPlayVideos, onChange: setAutoPlayVideos },
+    { id: '7', title: 'Send Usage Data', value: sendUsageData, onChange: setSendUsageData },
     // Add more settings as needed
   ];
 
