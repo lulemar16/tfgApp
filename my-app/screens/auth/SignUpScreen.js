@@ -11,15 +11,18 @@ const SignUpScreen = () => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleSignUp = () => {
     if (email && password){
-      try {
-        const user = signUp(email, password);
-        console.log('User signed up:', user);
-        navigation.navigate('Login')
-      } catch (error) {
-        console.error('Sign-up error:', error.message);
+      if (password === confirmPassword){
+        try {
+          const user = signUp(email, password);
+          console.log('User signed up:', user);
+          navigation.navigate('Login')
+        } catch (error) {
+          console.error('Sign-up error:', error.message);
+        }
       }
     }
   };
@@ -32,6 +35,7 @@ const SignUpScreen = () => {
       <Text style={styles.subtitle}>SIGN UP</Text>
       <TextInput style={styles.inputText} placeholder="Email" onChangeText={setEmail} />
       <TextInput style={styles.inputText} placeholder="Password" secureTextEntry onChangeText={setPassword} />
+      <TextInput style={styles.inputText} placeholder="Confirm password" secureTextEntry onChangeText={setConfirmPassword} />
       <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
             <Text style={styles.loginButton}>
                 Sign up
