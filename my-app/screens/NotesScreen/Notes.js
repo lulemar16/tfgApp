@@ -49,6 +49,7 @@ export default function Notes() {
     const fetchData = async () => {
       const sortedNotes = await fetchAndSortNotes();
       setNotes(sortedNotes);
+      console.log(notes);
     };
     fetchData();
   }, []);

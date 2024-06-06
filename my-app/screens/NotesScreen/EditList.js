@@ -29,6 +29,7 @@ const colorList = [
 export default ({ navigation, route }) => {
     const [id, setId] = useState(route.params.id || "");
     const [title, setTitle] = useState(route.params.title || "");
+    console.log('title: ', title);
     const [color, setColor] = useState(route.params.color || Colors.blue);
     const [isValid, setValidity] = useState(true);
 
@@ -76,7 +77,8 @@ export default ({ navigation, route }) => {
                 text="Save"
                 onPress={() => {
                     if (title.length > 1) {
-                        route.params.saveChanges(id, title, color );
+                        console.log('title 2: ', title);
+                        route.params.saveChanges({ id, title, color });
                         navigation.dispatch(CommonActions.goBack());
                     } else {
                         setValidity(false);

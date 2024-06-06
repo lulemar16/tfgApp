@@ -41,9 +41,10 @@ export default function ToDoScreen ( ) {
     const listsRef = collection(doc(db, 'users', userUID), 'lists');
 
     const fetchAndSortLists = async () => {
-        const listsSnapshot = await getDocs(
-          query(listsRef, orderBy("index"))
-        );
+        // const listsSnapshot = await getDocs(
+        //   query(listsRef, orderBy("index"))
+        // );
+        const listsSnapshot = await getDocs(listsRef);
         const listsData = listsSnapshot.docs.map(doc => doc.data());
         return listsData;
     };
@@ -55,6 +56,7 @@ export default function ToDoScreen ( ) {
         const fetchData = async () => {
             const listsData = await fetchAndSortLists();
             setLists(listsData); 
+            console.log(listsData);
         };
         fetchData();  
     }, []);
@@ -62,7 +64,8 @@ export default function ToDoScreen ( ) {
 
     const addItemToLists = async ({ title, color }) => {
         const index = lists.length > 0 ? lists[lists.length - 1].index + 1 : 0;
-        const docRef = await addDoc(collection(db, 'users', userUID, 'lists'), {
+        console.log(title);
+        const docRef = await addDoc(listsRef, {
             title,
             color,
             index

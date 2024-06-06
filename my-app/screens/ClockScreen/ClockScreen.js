@@ -31,6 +31,7 @@ const ClockScreen = () => {
   const [newAlarm, setNewAlarm] = useState('');
   const [newAlarmTitle, setNewAlarmTitle] = useState('');
   const [newTimer, setNewTimer] = useState('');
+  const [timerInterval, setTimerInterval] = useState('');
   const [newDeadline, setNewDeadline] = useState('');
   const [newDeadlineTitle, setNewDeadlineTitle] = useState('');
   const [showAlarmPicker, setShowAlarmPicker] = useState(false);
@@ -77,70 +78,7 @@ const ClockScreen = () => {
     };
   
     fetchDataAndRemovePassedDeadlines();
-  }, []);  
-
-
-  // useEffect(() => {
-  //   registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
-
-  //   notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-  //     setNotification(notification);
-  //   });
-
-  //   responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-  //     // console.log(response);
-  //   });
-
-  //   return () => {
-  //     Notifications.removeNotificationSubscription(notificationListener.current);
-  //     Notifications.removeNotificationSubscription(responseListener.current);
-  //   };
-  // }, []);
-
-  async function schedulePushNotification() {
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: "You've got mail! 📬",
-        body: 'Here is the notification body',
-        data: { data: 'goes here' },
-      },
-      trigger: { seconds: 2 },
-    });
-  }
-  
-  async function registerForPushNotificationsAsync() {
-    let token;
-  
-    if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('default', {
-        name: 'default',
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
-      });
-    }
-  
-    if (Device.isDevice) {
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-      if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-      if (finalStatus !== 'granted') {
-        alert('Failed to get push token for push notification!');
-        return;
-      }
-        token = await Notifications.getExpoPushTokenAsync({
-        projectId: Constants.expoConfig.extra.eas.projectId,
-      });
-    } else {
-      alert('Must use physical device for Push Notifications');
-    }
-  
-    return token;
-  }
-
+  }, []);
 
   const addAlarm = async (title, time) => {
     setShowAlarmPicker(false);
@@ -309,26 +247,6 @@ const ClockScreen = () => {
     setDeadlines(updatedDeadlines);
   };
 
-  const sendPushNotification = async (expoPushToken) => {
-    const message = {
-      to: expoPushToken,
-      sound: 'default',
-      title: 'My Notification Title',
-      body: 'This is the body of the notification',
-      data: { data: 'goes here' },
-    };
-  
-    await fetch('https://exp.host/--/api/v2/push/send', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Accept-encoding': 'gzip, deflate',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(message),
-    });
-  };
-
   const confirmDeleteAlarm = (alarm) => {
     
     Alert.alert(
@@ -362,15 +280,9 @@ const ClockScreen = () => {
       ]
     ); 
   };
-
+ 
   return (
       <ScrollView style={styles.container}>
-        <Button
-          title="Press to Send Notification"
-          onPress={async () => {
-            await sendPushNotification(expoPushToken);
-          }}
-        />
         <AlarmsSection
           alarms={alarms}
           newAlarm={newAlarm}

@@ -7,10 +7,10 @@ import {
   FlatList,
 } from 'react-native';
 import styles from './styles'; 
-
+ 
 const TimersSection = (props) => {
     const { timers, newTimer, addTimer, toggleTimer, setNewTimer, removeTimer } = props;
-  
+
     return (
       <View style={styles.section}>
         <Text style={styles.sectionHeading}>Timers</Text>

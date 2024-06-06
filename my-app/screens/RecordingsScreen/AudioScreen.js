@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Text, StyleSheet, View, TouchableOpacity, Alert, TextInput, Button } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, collection, addDoc, updateDoc, getDocs, doc, deleteDocs, deleteDoc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, updateDoc, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import { Audio } from 'expo-av';
 
 const auth = getAuth();
@@ -89,9 +89,11 @@ export default function AudioScreen() {
           <TouchableOpacity onPress={() => confirmDeleteRecording(recordingLine)}>
             <Icon name="delete" size={24} color="red" />
           </TouchableOpacity>
-          <Text style={styles.fill}>
-           {recordingLine.title} | {recordingLine.duration}
-          </Text>
+          <View style={styles.titleContainer}>
+            <Text style={styles.fill}>
+              {recordingLine.title} | {recordingLine.duration}
+            </Text>
+          </View>
           <View style={styles.playback}>
           <TouchableOpacity style={styles.playbackButton} onPress={() => playbackState ? pauseRecording() : playRecording(recordingLine.uri)}>
             <Text style={styles.buttonText}>{playbackState ? '||' : '▶'}</Text>
@@ -135,10 +137,17 @@ export default function AudioScreen() {
   };
   
 
-  const clearRecordings = () => {
-    setRecordings([]);
-    deleteDocs(recordsRef); 
-  }
+  const clearRecordings = async () => {
+    try {
+      for (let recording of recordings) {
+        await deleteDoc(doc(recordsRef, recording.id));
+      }
+      setRecordings([]);
+      console.log('All recordings cleared successfully.');
+    } catch (error) {
+      console.error('Error clearing recordings: ', error);
+    }
+  };  
 
   const saveRecordingToFirestore = async (newRecording) => {
     try {
@@ -182,9 +191,11 @@ export default function AudioScreen() {
       <TouchableOpacity style={styles.recordButton} onPress={recording ? stopRecording : startRecording}>
         <Text style={styles.buttonText}>{recording ? 'Stop Recording' : 'Start Recording'}</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.recordButton} onPress={clearRecordings}>
-        <Text style={styles.buttonText}>{recordings.length > 0 ? 'Clear Recordings' : ''}</Text>
-      </TouchableOpacity>
+      {recordings.length > 0 && (
+        <TouchableOpacity style={styles.recordButton} onPress={clearRecordings}>
+          <Text style={styles.buttonText}>{recordings.length > 0 ? 'Clear Recordings' : ''}</Text>
+        </TouchableOpacity>
+      )}
       {isRecording && (
           <TextInput
             style={styles.titleInput}
@@ -242,6 +253,11 @@ const styles = StyleSheet.create({
   },
   playback: {
     paddingLeft: '50%'
+  },
+  titleContainer: {
+    flex: 1,
+    marginLeft: 10,
+    marginRight: 5,
   },
   titleText: {
     color: 'black',
